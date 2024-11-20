@@ -279,7 +279,7 @@ class SWMMOutputException(Exception):
     """
     Exception class for SWMM output file processing errors.
     """
-    def __init__(self, message:):
+    def __init__(self, message: str) -> None:
         """
         Constructor to initialize the exception message.
 
@@ -824,137 +824,135 @@ cdef class Output:
 
         return results
 
-    # cpdef dict get_subcatchment_values_by_time_and_attribute(self, int time_index, int attribute):
-    #     """
-    #     Method to get the subcatchment values for all subcatchments for a given time index and attribute.
+    cpdef dict get_subcatchment_values_by_time_and_attribute(self, int time_index, int attribute):
+        """
+        Method to get the subcatchment values for all subcatchments for a given time index and attribute.
 
-    #     :param time_index: Time index.
-    #     :type time_index: int
-    #     :param attribute: Subcatchment attribute.
-    #     :type attribute: SubcatchAttribute
-    #     :return: Subcatchment values for all subcatchments. 
-    #     :rtype: Dict[str, float]
-    #     """
+        :param time_index: Time index.
+        :type time_index: int
+        :param attribute: Subcatchment attribute.
+        :type attribute: SubcatchAttribute
+        :return: Subcatchment values for all subcatchments. 
+        :rtype: Dict[str, float]
+        """
 
-    #     cdef int error_code = 0
-    #     cdef float* values = NULL
-    #     cdef int length = 0
+        cdef int error_code = 0
+        cdef float* values = NULL
+        cdef int length = 0
 
-    #     print(f"Testing {time_index} {attribute}")
-
-    #     error_code = SMO_getSubcatchAttribute(
-    #         self._output_file_handle, 
-    #         time_index, 
-    #         <SMO_subcatchAttribute>attribute, 
-    #         &values, 
-    #         &length
-    #     )
+        error_code = SMO_getSubcatchAttribute(
+            self._output_file_handle, 
+            time_index, 
+            <SMO_subcatchAttribute>attribute, 
+            &values, 
+            &length
+        )
         
-    #     self.__validate_error_code(error_code)
+        self.__validate_error_code(error_code)
 
-    #     subcatchment_values = dict(zip(self.get_element_names(ElementType.SUBCATCHMENT), <float[:length]>values))
+        subcatchment_values = dict(zip(self.get_element_names(ElementType.SUBCATCHMENT.value), <float[:length]>values))
 
-    #     if values != NULL:
-    #         free(values)
+        if values != NULL:
+            free(values)
         
-    #     return subcatchment_values
+        return subcatchment_values
 
-    # cpdef dict get_node_values_by_time_and_attribute(self, int time_index, int attribute):
-    #     """
-    #     Method to get the node values for all nodes for a given time index and attribute.
+    cpdef dict get_node_values_by_time_and_attribute(self, int time_index, int attribute):
+        """
+        Method to get the node values for all nodes for a given time index and attribute.
 
-    #     :param time_index: Time index.
-    #     :type time_index: int
-    #     :param attribute: Node attribute.
-    #     :type attribute: NodeAttribute
-    #     :return: Node values for all nodes.
-    #     :rtype: Dict[str, float]
-    #     """
+        :param time_index: Time index.
+        :type time_index: int
+        :param attribute: Node attribute.
+        :type attribute: NodeAttribute
+        :return: Node values for all nodes.
+        :rtype: Dict[str, float]
+        """
 
-    #     cdef int error_code = 0
-    #     cdef float* values = NULL
-    #     cdef int length = 0
+        cdef int error_code = 0
+        cdef float* values = NULL
+        cdef int length = 0
 
-    #     error_code = SMO_getNodeAttribute(
-    #         self._output_file_handle, 
-    #         time_index, <SMO_nodeAttribute>attribute, 
-    #         &values,
-    #         &length
-    #     )
+        error_code = SMO_getNodeAttribute(
+            self._output_file_handle, 
+            time_index, <SMO_nodeAttribute>attribute, 
+            &values,
+            &length
+        )
 
-    #     self.__validate_error_code(error_code)
+        self.__validate_error_code(error_code)
 
-    #     node_values = dict(zip(self.get_element_names(ElementType.NODE), <float[:length]>values))
+        node_values = dict(zip(self.get_element_names(ElementType.NODE.value), <float[:length]>values))
 
-    #     if values != NULL:
-    #         free(values)
+        if values != NULL:
+            free(values)
         
-    #     return node_values
+        return node_values
 
-    # cpdef dict get_link_values_by_time_and_attribute(self, int time_index, int attribute):
-    #     """
-    #     Method to get the link values for all links for a given time index and attribute.
+    cpdef dict get_link_values_by_time_and_attribute(self, int time_index, int attribute):
+        """
+        Method to get the link values for all links for a given time index and attribute.
 
-    #     :param time_index: Time index.
-    #     :type time_index: int
-    #     :param attribute: Link attribute.
-    #     :type attribute: LinkAttribute
-    #     :return: Link values for all links.
-    #     :rtype: Dict[str, float]
-    #     """
+        :param time_index: Time index.
+        :type time_index: int
+        :param attribute: Link attribute.
+        :type attribute: LinkAttribute
+        :return: Link values for all links.
+        :rtype: Dict[str, float]
+        """
 
-    #     cdef int error_code = 0
-    #     cdef float* values = NULL
-    #     cdef int length = 0
+        cdef int error_code = 0
+        cdef float* values = NULL
+        cdef int length = 0
 
-    #     error_code = SMO_getLinkAttribute(
-    #         self._output_file_handle, 
-    #         time_index, <SMO_linkAttribute>attribute, 
-    #         &values,
-    #         &length
-    #         )
+        error_code = SMO_getLinkAttribute(
+            self._output_file_handle, 
+            time_index, <SMO_linkAttribute>attribute, 
+            &values,
+            &length
+            )
         
-    #     self.__validate_error_code(error_code)
+        self.__validate_error_code(error_code)
 
-    #     link_values = dict(zip(self.get_element_names(ElementType.LINK), <float[:length]>values))
+        link_values = dict(zip(self.get_element_names(ElementType.LINK.value), <float[:length]>values))
 
-    #     if values != NULL:
-    #         free(values)
+        if values != NULL:
+            free(values)
         
-    #     return link_values
+        return link_values
    
-    # cpdef dict get_system_values_by_time_and_attribute(self, int time_index, int attribute):
-    #     """
-    #     Method to get the system values for a given time index and attribute.
+    cpdef dict get_system_values_by_time_and_attribute(self, int time_index, int attribute):
+        """
+        Method to get the system values for a given time index and attribute.
         
-    #     :param time_index: Time index.
-    #     :type time_index: int
-    #     :param attribute: System attribute.
-    #     :type attribute: SystemAttribute
-    #     :return: System values.
-    #     :rtype: Dict[str, float]
-    #     """
+        :param time_index: Time index.
+        :type time_index: int
+        :param attribute: System attribute.
+        :type attribute: SystemAttribute
+        :return: System values.
+        :rtype: Dict[str, float]
+        """
 
-    #     cdef int error_code = 0
-    #     cdef float* values = NULL
-    #     cdef int length = 0
+        cdef int error_code = 0
+        cdef float* values = NULL
+        cdef int length = 0
 
-    #     error_code = SMO_getSystemAttribute(
-    #         self._output_file_handle, 
-    #         time_index, <SMO_systemAttribute>attribute, 
-    #         &values,
-    #         &length
-    #         )
+        error_code = SMO_getSystemAttribute(
+            self._output_file_handle, 
+            time_index, <SMO_systemAttribute>attribute, 
+            &values,
+            &length
+            )
         
-    #     self.__validate_error_code(error_code)
+        self.__validate_error_code(error_code)
 
-    #     system_values = dict(zip([SubcatchAttribute(attribute).name], <float[:length]>values))
+        system_values = dict(zip([SubcatchAttribute(attribute).name], <float[:length]>values))
 
 
-    #     if values != NULL:
-    #         free(values)
+        if values != NULL:
+            free(values)
         
-    #     return system_values
+        return system_values
 
     cpdef dict get_subcatchment_values_by_time_and_element_index(self, int time_index, int element_index):
         """

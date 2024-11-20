@@ -8,5 +8,6 @@ from .output import (
     NodeAttribute,
     LinkAttribute,
     SystemAttribute,
+    SWMMOutputException,
     Output,
 )

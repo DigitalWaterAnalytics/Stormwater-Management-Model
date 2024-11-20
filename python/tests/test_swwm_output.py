@@ -13,7 +13,7 @@ import pickle
 # local imports
 from .data import output as example_output_data
 from epaswmm import output
-from epaswmm.output import Output
+from epaswmm.output import Output, SWMMOutputException
 
 
 class TestSWMMOutput(unittest.TestCase):
@@ -341,7 +341,7 @@ class TestSWMMOutput(unittest.TestCase):
         pollutant_names = ['TSS', 'Lead']
         self.assertListEqual(retrieved_pollutant_names, pollutant_names, "Pollutant names should be [TSS, TSS]")
 
-        with self.assertRaises(IndexError) as context:
+        with self.assertRaises(SWMMOutputException) as context:
             swmm_output.get_element_names(output.ElementType.SYSTEM.value)
 
         self.assertIn(
@@ -441,116 +441,116 @@ class TestSWMMOutput(unittest.TestCase):
             self.test_artifacts['test_get_system_timeseries'],
         )
 
-    def test_get_subcatchment_values_attributes(self):
+    def test_get_subcatchment_values_by_time_and_attributes(self):
         """
         Test the output get subcatchment values by time and attributes function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        subcatchment_values = swmm_output.get_subcatchment_values_attribute(
+        subcatchment_values = swmm_output.get_subcatchment_values_by_time_and_attribute(
             time_index=5,
             attribute=output.SubcatchAttribute.RUNOFF_RATE.value
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             subcatchment_values,
-            self.test_artifacts['test_get_subcatchment_values_attributes'],
+            self.test_artifacts['test_get_subcatchment_values_by_time_and_attributes'],
         )
 
-    def test_get_node_values_attributes(self):
+    def test_get_node_values_by_time_and_attributes(self):
         """
         Test the output get node values by time and attributes function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        node_values = swmm_output.get_node_values_attribute(
+        node_values = swmm_output.get_node_values_by_time_and_attribute(
             time_index=8,
             attribute=output.NodeAttribute.TOTAL_INFLOW.value
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             node_values,
-            self.test_artifacts['test_get_node_values_attributes'],
+            self.test_artifacts['test_get_node_values_by_time_and_attributes'],
         )
 
-    def test_get_link_values_attributes(self):
+    def test_get_link_values_by_time_and_attributes(self):
         """
         Test the output get link values by time and attributes function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        link_values = swmm_output.get_link_values_by_attribute(
+        link_values = swmm_output.get_link_values_by_time_and_attribute(
             time_index=10,
             attribute=output.LinkAttribute.FLOW_RATE.value
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             link_values,
-            self.test_artifacts['test_get_link_values_attributes'],
+            self.test_artifacts['test_get_link_values_by_time_and_attributes'],
         )
 
-    def test_get_system_values_attributes(self):
+    def test_get_system_values_by_time_and_attributes(self):
         """
         Test the output get system values by time and attributes function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        system_values = swmm_output.get_system_values_attribute(
+        system_values = swmm_output.get_system_values_by_time_and_attribute(
             time_index=12,
             attribute=output.SystemAttribute.RUNOFF_FLOW.value
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             system_values,
-            self.test_artifacts['test_get_system_values_attributes'],
+            self.test_artifacts['test_get_system_values_by_time_and_attributes'],
         )
 
-    def test_get_subcatchment_values_index(self):
+    def test_get_subcatchment_values_by_time_and_index(self):
         """
         Test the output get subcatchment values by time and index function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        subcatchment_values = swmm_output.get_subcatchment_values_element_index(
+        subcatchment_values = swmm_output.get_subcatchment_values_by_time_and_element_index(
             time_index=5,
             element_index=3
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             subcatchment_values,
-            self.test_artifacts['test_get_subcatchment_values_index'],
+            self.test_artifacts['test_get_subcatchment_values_by_time_and_index'],
         )
 
-    def test_get_node_values_index(self):
+    def test_get_node_values_by_time_and_index(self):
         """
         Test the output get node values by time and index function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        node_values = swmm_output.get_node_values_element_index(
+        node_values = swmm_output.get_node_values_by_time_and_element_index(
             time_index=8,
             element_index=4
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             node_values,
-            self.test_artifacts['test_get_node_values_index'],
+            self.test_artifacts['test_get_node_values_by_time_and_index'],
         )
 
-    def test_get_link_values_index(self):
+    def test_get_link_values_by_time_and_index(self):
         """
         Test the output get link values by time and index function
         :return:
         """
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
-        link_values = swmm_output.get_link_values_element_index(
+        link_values = swmm_output.get_link_values_by_time_and_element_index(
             time_index=10,
             element_index=5
         )
 
         TestSWMMOutput.assert_dict_almost_equal(
             link_values,
-            self.test_artifacts['test_get_link_values_index'],
+            self.test_artifacts['test_get_link_values_by_time_and_index'],
         )
 
     def test_get_system_values_by_time(self):
