@@ -1,0 +1,20 @@
+# Description: __init__.py file for the epaswmm.solver package.
+# Created by: Caleb Buahin (EPA/ORD/CESER/WID)
+# Created on: 2024-11-19
+
+from .solver import (
+    SWMMObjects,
+    SWMMNodeTypes,
+    SWMMRainGageProperties,
+    SWMMSubcatchmentProperties,
+    SWMMNodeProperties,
+    SWMMLinkProperties,
+    SWMMSystemProperties,
+    SWMMFlowUnits,
+    SWMMAPIErrors,
+    run_solver,
+    decode_swmm_datetime,
+    version,
+    SolverState,
+    Solver,
+)

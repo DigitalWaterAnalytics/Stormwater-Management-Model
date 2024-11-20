@@ -2,19 +2,15 @@
 # Created by: Caleb Buahin (EPA/ORD/CESER/WID)
 # Created on: 2024-11-19
 
-# Add Cython targets for array and epaswmm
-add_cython_target(array array.pyx CXX PY3)
+# Add Cython targets for epaswmm
 add_cython_target(epaswmm epaswmm.pyx CXX PY3)
 
 # Create Python extension modules
-add_library(array MODULE ${array})
 add_library(epaswmm MODULE ${epaswmm})
 
-python_extension_module(array)
 python_extension_module(epaswmm)
 
-# Install the array and epaswmm modules
-install(TARGETS array LIBRARY DESTINATION epaswmm)
+# Install the epaswmm module
 install(TARGETS epaswmm LIBRARY DESTINATION epaswmm)
 
 # Include the current source directory
