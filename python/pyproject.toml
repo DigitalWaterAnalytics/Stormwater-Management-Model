@@ -1,0 +1,62 @@
+# Description: The pyproject.toml file for the epaswmm python package
+# Created by: Caleb Buahin (EPA/ORD/CESER/WID)
+# Created on: 2024-11-19
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel>=0.45.0",
+    "cmake>=3.26.0",
+    "scikit-build>=0.18.1",
+    "cython>=3.0.11",
+]
+
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "epaswmm"
+description = "A python package for EPA SWMM5 preprocessing, solver, and post-processing."
+readme = {file = "README.md",content-type = "text/markdown"}
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+dynamic = ["version"]
+keywords = ["SWMM", "stormwater", "modeling", "water", "hydrology", "hydraulics", "wastewater"]
+
+authors = [
+    {name = "Caleb Buahin", email = "buahin.caleb@epa.gov"},
+]
+
+maintainers = [
+    {name = "Caleb Buahin", email = "buahin.caleb@epa.gov"}
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 3 - Alpha",
+]
+
+
+[project.urls]
+# TODO: Change these URLs to the correct ones
+Homepage = "https://github.com/USEPA/Stormwater-Management-Model"
+Documentation = "https://github.com/USEPA/Stormwater-Management-Model"
+"Source Code" = "https://github.com/USEPA/Stormwater-Management-Model"
+"Bug Tracker" = "https://github.com/USEPA/Stormwater-Management-Model/issues"
+Repository =  "https://github.com/USEPA/Stormwater-Management-Model"
+Changelog = "https://github.com/USEPA/Stormwater-Management-Model/blob/master/CHANGELOG.md"

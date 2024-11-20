@@ -45,7 +45,7 @@
 //   Build 5.3.0:
 //   - Added support for saving hot start files at specific times.
 //   - Expanded SWMM api to save and use prescribed hotstart files.
-//   - Expanded SWMM api to allow setting some system options.
+//   - Expansions to the SWMM API to include attributes of more objects and water quality.
 //-----------------------------------------------------------------------------
 #define _CRT_SECURE_NO_DEPRECATE
 

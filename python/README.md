@@ -1,7 +1,7 @@
-ORD Stormwater-Management-Model Solver
+Stormwater-Management-Model Python Bindings
 ==================================
 
-Stormwater Management Model (SWMM) computational engine
+A python package for Stormwater Management Model (SWMM).
 
 
 ## Build Status

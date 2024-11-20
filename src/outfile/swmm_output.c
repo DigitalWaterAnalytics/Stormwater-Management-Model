@@ -1,14 +1,12 @@
-/*
- * swmm_output.c - SWMM Output API
- *
- *      Author: Colleen Barr
- *           US EPA - ORD/NHEERL
- *
- *      Modified by: Michael E. Tryby,
- *                   Bryant McDonnell
- *
- */
-
+/*!
+* \file swmm_output.c
+* \brief Source code providing an API for reading SWMM binary output files.
+* \author Colleen Barr (US EPA - ORD/NHEERL)
+* \author  Michael E. Tryby (US EPA - ORD/NHEERL) (Modified)
+* \author  Bryant McDonnell (Modified)
+* \date Created On: 2017-08-25
+* \date Last Edited: 2024-10-17
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,100 +19,282 @@
 
 
 // NOTE: These depend on machine data model and may change when porting
-// F_OFF Must be a 8 byte / 64 bit integer for large file support
 #ifdef _WIN32    // Windows (32-bit and 64-bit)
+/*!
+* \def F_OFF
+* \brief 8 byte / 64 bit integer for large file support on Windows (32-bit and 64-bit)
+* \note This is a Microsoft specific type. 
+*/
 #define F_OFF __int64
-#else    // Other platforms
+#else
+/*!
+* \def F_OFF
+* \brief 8 byte / 64 bit integer for large file support on Unix-like systems
+*/
 #define F_OFF off_t
 #endif
-#define INT4 int      // Must be a 4 byte / 32 bit integer type
-#define REAL4 float   // Must be a 4 byte / 32 bit real type
 
-#define RECORDSIZE 4  // Memory alignment 4 byte word size for both int and real
-#define DATESIZE 8    // Dates are stored as 8 byte word size
+/*!
+* \def INT4
+* \brief Must be a 4 byte / 32 bit integer type
+*/
+#define INT4 int
 
-#define NELEMENTTYPES 5    // Number of element types
+/*!
+* \def REAL4
+* \brief Must be a 4 byte / 32 bit real type
+*/
+#define REAL4 float
 
+/*!
+* \def RECORDSIZE
+* \brief Memory alignment 4 byte word size for both int and real types
+*/
+#define RECORDSIZE 4
+
+
+/*!
+* \def DATASIZE
+* \brief Dates are stored as 8 byte word size
+*/
+#define DATESIZE 8
+
+/*!
+* \def NELEMENTTYPES
+* \brief Number of element types
+*/
+#define NELEMENTTYPES 5
+
+/*!
+* \def MEMCHECK 
+* \brief Check if memory allocation was successful
+*/
 #define MEMCHECK(x) (((x) == NULL) ? 414 : 0)
 
+/*!
+* \struct IDentry
+* \brief Structure for element names
+*/
 struct IDentry {
+	/*! \brief Pointer to element name */ 
     char* IDname;
+	/*! \brief Length of element name */
     int   length;
 };
 typedef struct IDentry idEntry;
 
-//-----------------------------------------------------------------------------
-//  Shared variables
-//-----------------------------------------------------------------------------
 
+/*!
+* \struct data
+* \brief Structure for SWMM binary output file data
+*/
 typedef struct {
-    char  name[MAXFILENAME + 1];    // file path/name
-    FILE* file;                     // FILE structure pointer
+	/*! \brief File path/name */
+    char  name[MAXFILENAME + 1];
 
-    struct IDentry* elementNames;    // array of pointers to element names
+	/*! \brief File pointer */
+    FILE* file;
 
-    long Nperiods;     // number of reporting periods
-    int  FlowUnits;    // flow units code
+	/*! \brief Array of pointers to element names */
+    struct IDentry* elementNames;
 
-    int Nsubcatch;    // number of subcatchments
-    int Nnodes;       // number of drainage system nodes
-    int Nlinks;       // number of drainage system links
-    int Npolluts;     // number of pollutants tracked
+	/*! \brief Number of reporting periods */
+    long Nperiods;
 
-    int SubcatchVars;    // number of subcatch reporting variables
-    int NodeVars;        // number of node reporting variables
-    int LinkVars;        // number of link reporting variables
-    int SysVars;         // number of system reporting variables
+	/*! \brief Flow units code */
+    int  FlowUnits;
 
-    double StartDate;     // start date of simulation
-    int    ReportStep;    // reporting time step (seconds)
+	/*! \brief Number of subcatchments */
+    int Nsubcatch;
 
-    F_OFF IDPos;             // file position where object ID names start
-    F_OFF ObjPropPos;        // file position where object properties start
-    F_OFF ResultsPos;        // file position where results start
-    F_OFF BytesPerPeriod;    // bytes used for results in each period
+	/*! \brief Number of nodes */
+    int Nnodes;
 
+	/*! \brief Number of links */
+    int Nlinks;
+
+	/*! \brief Number of pollutants */
+    int Npolluts;
+
+	/*! \brief Number of subcatch reporting variables */
+    int SubcatchVars;
+
+	/*! \brief Number of node reporting variables */
+    int NodeVars;
+
+	/*! \brief Number of link reporting variables */
+    int LinkVars;
+
+	/*! \brief Number of system reporting variables */
+    int SysVars;
+
+	/*! \brief Start date of simulation */
+    double StartDate;
+
+	/*! \brief Reporting time step (seconds) */
+    int    ReportStep;
+
+	/*! \brief File position where object ID names start */
+    F_OFF IDPos;
+
+	/*! \brief File position where object properties start */
+    F_OFF ObjPropPos;
+
+	/*! \brief File position where results start */
+    F_OFF ResultsPos;
+
+	/*! \brief Number of bytes used for results in each period */
+    F_OFF BytesPerPeriod;
+
+	/*! \brief Pointer to error manager handle */
     error_handle_t* error_handle;
 } data_t;
+
 
 //-----------------------------------------------------------------------------
 //   Local functions
 //-----------------------------------------------------------------------------
+
+/*!
+* \brief Error lookup function
+* \param[in] errcode Error code
+* \param[out] errmsg Error message
+* \param[in] length Length of error message
+*/
 void errorLookup(int errcode, char *errmsg, int length);
+
+/*!
+* \brief Validate the output file
+* \param[in] p_data Pointer to data structure
+* \return Error code
+*/
 int  validateFile(data_t *p_data);
+
+/*!
+* \brief Initialize element names
+* \param[in] p_data Pointer to data structure
+*/
 void initElementNames(data_t *p_data);
 
+/*!
+* \brief Get time value
+* \param[in] p_data Pointer to data structure
+* \param[in] timeIndex Time index
+* \return Time value
+*/
 double getTimeValue(data_t *p_data, int timeIndex);
+
+/*!
+* \brief Get subcatchment value
+* \param[in] p_data Pointer to data structure
+* \param[in] timeIndex Time index
+* \param[in] subcatchIndex Subcatchment index
+* \param[in] attr Subcatchment attribute
+* \return Subcatchment value
+*/
 float  getSubcatchValue(data_t *p_data, int timeIndex, int subcatchIndex, SMO_subcatchAttribute attr);
+
+/*!
+* \brief Get node value 
+* \param[in] p_data Pointer to data structure
+* \param[in] timeIndex Time index
+* \param[in] nodeIndex Node index
+* \param[in] attr Node attribute
+* \return Node value
+*/
 float  getNodeValue(data_t *p_data, int timeIndex, int nodeIndex, SMO_nodeAttribute attr);
+
+/*!
+* \brief Get link value
+* \param[in] p_data Pointer to data structure
+* \param[in] timeIndex Time index
+* \param[in] linkIndex Link index
+* \param[in] attr Link attribute
+* \return Link value
+*/
 float  getLinkValue(data_t *p_data, int timeIndex, int linkIndex, SMO_linkAttribute attr);
+
+/*!
+* \brief Get system value
+* \param[in] p_data Pointer to data structure
+* \param[in] timeIndex Time index
+* \param[in] attr System attribute
+* \return System value
+*/
 float  getSystemValue(data_t *p_data, int timeIndex, SMO_systemAttribute attr);
 
+/*!
+* \brief Open file for reading with error handling 
+* \param[in] f Pointer to file pointer
+* \param[in] name File path/name
+* \param[in] mode File mode
+* \return Error
+* \note This function is a wrapper for fopen
+*/
 int   _fopen(FILE **f, const char *name, const char *mode);
+
+/*!
+* \brief Seek to position in file with error handling
+* \param[in] stream Pointer to file stream
+* \param[in] offset Offset from whence
+* \param[in] whence Position in file
+* \return Error
+* \note This function is a wrapper for fseek
+*/
 int   _fseek(FILE *stream, F_OFF offset, int whence);
+
+/*!
+* \brief Get current position in file with error handling
+* \param[in] stream Pointer to file stream
+* \return Current position in file
+* \note This function is a wrapper for ftell
+*/
 F_OFF _ftell(FILE *stream);
 
+/*!
+* \brief Allocate memory for float array
+* \param[in] n Number of elements
+* \return Pointer to float array
+*/
 float *newFloatArray(int n);
+
+/*!
+* \brief Allocate memory for integer array
+* \param[in] n Number of elements
+* \return Pointer to integer array
+*/
 int   *newIntArray(int n);
+
+/*!
+* \brief Allocate memory for character array
+* \param[in] n Number of elements
+* \return Pointer to character array
+*/
 char  *newCharArray(int n);
 
+
+/*!
+* \brief Initialize pointer for the opaque SMO_Handle.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \return Error code 0 on success, -1 on failure
+* \note The existence of this function has been carefully considered. Don't change it.
+* \todo Need to handle errors during initialization better.
+*/
 int EXPORT_OUT_API SMO_init(SMO_Handle *p_handle)
-//  Purpose: Initialized pointer for the opaque SMO_Handle.
-//
-//  Returns: Error code 0 on success, -1 on failure
-//
-//  Note: The existence of this function has been carefully considered.
-//   Don't change it.
-//
 {
     int     errorcode = 0;
-    data_t *priv_data;
+    data_t *priv_data = NULL;
 
-    // Allocate memory for private data
+    // // Allocate memory for private data
     priv_data = (data_t *)calloc(1, sizeof(data_t));
 
     if (priv_data != NULL) {
-        priv_data->error_handle = new_errormanager(&errorLookup);
+        
+        priv_data->elementNames = NULL;
+        priv_data->file = NULL;
+
+        priv_data->error_handle = new_error_manager(errorLookup);
+        
         *p_handle = priv_data;
     } else
         errorcode = -1;
@@ -123,10 +303,13 @@ int EXPORT_OUT_API SMO_init(SMO_Handle *p_handle)
     return errorcode;
 }
 
-int EXPORT_OUT_API SMO_close(SMO_Handle* p_handle)
-//
-//   Purpose: Clean up after and close Output API
-//
+
+/*!
+* \brief Clean up after and close Output API
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \return Error code 0 on success, -1 on failure
+*/
+int EXPORT_OUT_API SMO_close(SMO_Handle *p_handle)
 {
     data_t *p_data;
     int i, n, errorcode = 0;
@@ -147,7 +330,7 @@ int EXPORT_OUT_API SMO_close(SMO_Handle* p_handle)
             free(p_data->elementNames);
         }
 
-        dst_errormanager(p_data->error_handle);
+        dst_error_manager(p_data->error_handle);
 
         if (p_data->file != NULL)
             fclose(p_data->file);
@@ -160,10 +343,13 @@ int EXPORT_OUT_API SMO_close(SMO_Handle* p_handle)
     return errorcode;
 }
 
+/*!
+* \brief Open the output binary file and read the header.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[in] path File path/name
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_open(SMO_Handle p_handle, const char *path)
-//
-//  Purpose: Open the output binary file and read the header.
-//
 {
     int   err, errorcode = 0;
     F_OFF offset;
@@ -250,14 +436,13 @@ int EXPORT_OUT_API SMO_open(SMO_Handle p_handle, const char *path)
     return errorcode;
 }
 
+/*!
+* \brief Get the SWMM version that wrote the binary file.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] version SWMM version
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getVersion(SMO_Handle p_handle, int *version)
-//
-//  Input:   p_handle = pointer to SMO_Handle struct
-//  Output:  version SWMM version
-//  Returns: error code
-//
-//  Purpose: Returns SWMM version that wrote binary file
-//
 {
     int     errorcode = 0;
     data_t *p_data;
@@ -275,10 +460,14 @@ int EXPORT_OUT_API SMO_getVersion(SMO_Handle p_handle, int *version)
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Get project size.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] elementCount Array of element counts
+* \param[out] length Length of elementCount array
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getProjectSize(SMO_Handle p_handle, int **elementCount, int *length)
-//
-//   Purpose: Returns project size.
-//
 {
     int     errorcode = 0;
     int     *temp;
@@ -306,11 +495,14 @@ int EXPORT_OUT_API SMO_getProjectSize(SMO_Handle p_handle, int **elementCount, i
     return set_error(p_data->error_handle, errorcode);
 }
 
-
+/*!
+* \brief Get unit system.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] unitFlag Unit system flag
+* \param[out] length Length of unitFlag array
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getUnits(SMO_Handle p_handle, int **unitFlag, int *length)
-//
-//  Purpose: Returns unit flags for unit_system, flow, and pollutants.
-//
 {
     int     errorcode = 0;
     int*    temp;
@@ -356,18 +548,18 @@ int EXPORT_OUT_API SMO_getUnits(SMO_Handle p_handle, int **unitFlag, int *length
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Returns unit flag for flow
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] unitFlag Flow unit flag
+* \returns 0: CFS (cubic feet per second), 
+*          1: GPM (gallons per minute), 
+*          2: MGD (million gallons per day), 
+*          3: CMS (cubic meters per second), 
+*          4: LPS (liters per second), 
+*          5: MLD (million liters per day)
+*/
 int EXPORT_OUT_API SMO_getFlowUnits(SMO_Handle p_handle, int *unitFlag)
-//
-//   Purpose: Returns unit flag for flow.
-//
-//   Returns:
-//            0: CFS  (cubic feet per second)
-//            1: GPM  (gallons per minute)
-//            2: MGD  (million gallons per day)
-//            3: CMS  (cubic meters per second)
-//            4: LPS  (liters per second)
-//            5: MLD  (million liters per day)
-//
 {
     int     errorcode = 0;
     data_t* p_data;
@@ -386,19 +578,20 @@ int EXPORT_OUT_API SMO_getFlowUnits(SMO_Handle p_handle, int *unitFlag)
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Returns unit flag for pollutant. Concentration units are located after the pollutant ID
+* names and before the object properties start, and are stored for each pollutant. They're stored
+* as 4-byte integers with the following codes:
+* 0: mg/L
+* 1: ug/L
+* 2: count/L
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] unitFlag Array of unit flags
+* \param[out] length Length of unitFlag array
+* \returns Error code
+* \note Valid values are 0 to Npolluts-1
+*/
 int EXPORT_OUT_API SMO_getPollutantUnits(SMO_Handle p_handle, int **unitFlag, int *length)
-//
-//   Purpose:
-//     Return integer flag representing the units that the given pollutant is
-//     measured in. Concentration units are located after the pollutant ID
-//     names and before the object properties start, and are stored for each
-//     pollutant.  They're stored as 4-byte integers with the following codes:
-//       0: mg/L
-//       1: ug/L
-//       2: count/L
-//
-//   Args:
-//     pollutantIndex: valid values are 0 to Npolluts-1
 {
     int    errorcode = 0;
     int    *temp;
@@ -423,10 +616,13 @@ int EXPORT_OUT_API SMO_getPollutantUnits(SMO_Handle p_handle, int **unitFlag, in
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Get start date.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[out] date Start date
+* \return Error code 0 on success, -1 on failure
+*/
 int EXPORT_OUT_API SMO_getStartDate(SMO_Handle p_handle, double *date)
-//
-//	Purpose: Returns start date.
-//
 {
     int     errorcode = 0;
     data_t *p_data;
@@ -443,10 +639,14 @@ int EXPORT_OUT_API SMO_getStartDate(SMO_Handle p_handle, double *date)
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Get report step and number of periods.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[in] code Time code (SMO_reportStep or SMO_numPeriods)
+* \param[out] time Time value (report step or number of periods)
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getTimes(SMO_Handle p_handle, SMO_time code, int *time)
-//
-//   Purpose: Returns step size and number of periods.
-//
 {
     int    errorcode = 0;
     data_t *p_data;
@@ -473,11 +673,16 @@ int EXPORT_OUT_API SMO_getTimes(SMO_Handle p_handle, SMO_time code, int *time)
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Get element name by index.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[in] type Element type
+* \param[in] index Element index
+* \param[out] name Element name
+* \param[out] length Length of element name
+*/
 int EXPORT_OUT_API SMO_getElementName(SMO_Handle p_handle, SMO_elementType type,
     int index, char **name, int *length)
-//
-//  Purpose: Given an element index returns the element name.
-//
 {
     int    idx = -1, errorcode = 0;
     data_t *p_data;
@@ -550,13 +755,22 @@ int EXPORT_OUT_API SMO_getElementName(SMO_Handle p_handle, SMO_elementType type,
     return set_error(p_data->error_handle, errorcode);
 }
 
+
+/*!
+* \brief Get subcatchment time series results for particular attribute. Specify series
+* start and length using timeIndex and length respectively.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[in] subcatchIndex Subcatchment index
+* \param[in] attr Subcatchment attribute
+* \param[in] startPeriod Start period
+* \param[in] endPeriod End period
+* \param[out] outValueArray Array of values
+* \param[out] length Length of outValueArray
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getSubcatchSeries(SMO_Handle p_handle, int subcatchIndex,
     SMO_subcatchAttribute attr, int startPeriod, int endPeriod,
     float **outValueArray, int *length)
-//
-//  Purpose: Get time series results for particular attribute. Specify series
-//  start and length using timeIndex and length respectively.
-//
 {
     int    k, len, errorcode = 0;
     float  *temp;
@@ -588,13 +802,21 @@ int EXPORT_OUT_API SMO_getSubcatchSeries(SMO_Handle p_handle, int subcatchIndex,
     return set_error(p_data->error_handle, errorcode);
 }
 
+/*!
+* \brief Get node time series results for particular attribute. Specify series
+* start and length using timeIndex and length respectively.
+* \param[in] p_handle Pointer to opaque SMO_Handle
+* \param[in] nodeIndex Node index
+* \param[in] attr Node attribute
+* \param[in] startPeriod Start period
+* \param[in] endPeriod End period
+* \param[out] outValueArray Array of values
+* \param[out] length Length of outValueArray
+* \return Error code 0 on success, -1 on failure or error code
+*/
 int EXPORT_OUT_API SMO_getNodeSeries(SMO_Handle p_handle, int nodeIndex,
     SMO_nodeAttribute attr, int startPeriod, int endPeriod,
     float **outValueArray, int *length)
-//
-//  Purpose: Get time series results for particular attribute. Specify series
-//  start and length using timeIndex and length respectively.
-//
 {
     int    k, len, errorcode = 0;
     float  *temp;
@@ -796,7 +1018,7 @@ int EXPORT_OUT_API SMO_getSystemAttribute(SMO_Handle p_handle, int periodIndex,
 //
 {
     int     errorcode = 0;
-    float   temp;
+    float   *temp;
     data_t *p_data;
 
     p_data = (data_t *)p_handle;
@@ -805,11 +1027,13 @@ int EXPORT_OUT_API SMO_getSystemAttribute(SMO_Handle p_handle, int periodIndex,
         errorcode = -1;
     else if (periodIndex < 0 || periodIndex >= p_data->Nperiods)
         errorcode = 422;
+    else if
+        MEMCHECK(temp = newFloatArray(1)) errorcode = 411;
     else {
         // don't need to loop since there's only one system
-        temp = getSystemValue(p_data, periodIndex, attr);
+        temp[0] = getSystemValue(p_data, periodIndex, attr);
 
-        *outValueArray = &temp;
+        *outValueArray = temp;
         *length        = 1;
     }
 

@@ -384,7 +384,6 @@ void  findLimitedLinks()
 void findLinkFlows(double dt)
 {
     int i;
-
     // --- find new flow in each non-dummy conduit
 #pragma omp parallel num_threads(NumThreads)
 {

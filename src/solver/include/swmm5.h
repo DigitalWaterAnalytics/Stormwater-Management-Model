@@ -7,6 +7,12 @@
 //   Author:  L. Rossman
 //
 //   Prototypes for SWMM5 API functions.
+//   
+//   Update History
+//   ==============
+//   Build 5.3.0:
+//   - Added new functions to support saving hotstart files at specific times.
+//   - Expansions to the SWMM API to include attributes of more objects and water quality.
 //
 //-----------------------------------------------------------------------------
 
@@ -42,6 +48,20 @@ typedef enum {
     swmm_SUBCATCH = 1,
     swmm_NODE     = 2,
     swmm_LINK     = 3,
+    swmm_AQUIFER = 4,
+    swmm_SNOWPACK = 5,
+    swmm_UNIT_HYDROGRAPH  = 6,
+    swmm_LID     = 7,
+    swmm_STREET = 8,
+    swmm_INLET  = 9,
+    swmm_TRANSECT  = 10,
+    smmm_XSECTION_SHAPE = 11,
+    swmm_CONTROL_RULE = 12,
+    swmm_POLLUTANT = 13,
+    swmm_LANDUSE = 14,
+    swmm_CURVE = 15,
+    swmm_TIMESERIES = 16,
+    swmm_TIME_PATTERN = 17,
     swmm_SYSTEM   = 100
 } swmm_Object;
 
@@ -61,7 +81,9 @@ typedef enum {
 } swmm_LinkType;
 
 typedef enum {
-    swmm_GAGE_RAINFALL = 100
+    swmm_GAGE_TOTAL_PRECIPITATION = 100,
+    swmm_GAGE_RAINFALL = 101,
+    swmm_GAGE_SNOWFALL = 102,
 } swmm_GageProperty;
 
 typedef enum {
@@ -71,7 +93,11 @@ typedef enum {
     swmm_SUBCATCH_EVAP      = 203,
     swmm_SUBCATCH_INFIL     = 204,
     swmm_SUBCATCH_RUNOFF    = 205,
-    swmm_SUBCATCH_RPTFLAG   = 206
+    swmm_SUBCATCH_RPTFLAG   = 206,
+    swmm_SUBCATCH_POLLUTANT_BUILDUP  = 207,
+    swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION = 208,
+    swmm_SUBCATCH_POLLUTANT_RUNOFF_CONCENTRATION = 209,
+    swmm_SUBCATCH_POLLUTANT_TOTAL_LOAD = 210,
 } swmm_SubcatchProperty;
 
 typedef enum {
@@ -84,7 +110,9 @@ typedef enum {
     swmm_NODE_LATFLOW  = 306,
     swmm_NODE_INFLOW   = 307,
     swmm_NODE_OVERFLOW = 308,
-    swmm_NODE_RPTFLAG  = 309
+    swmm_NODE_RPTFLAG  = 309,
+    swmm_NODE_POLLUTANT_CONCENTRATION = 310,
+    swmm_NODE_POLLUTANT_INFLOW_CONCENTRATION = 311,
 } swmm_NodeProperty;
 
 typedef enum {
@@ -102,7 +130,9 @@ typedef enum {
     swmm_LINK_DEPTH      = 411,
     swmm_LINK_VELOCITY   = 412,
     swmm_LINK_TOPWIDTH   = 413,
-    swmm_LINK_RPTFLAG    = 414
+    swmm_LINK_RPTFLAG    = 414,
+    swmm_LINK_POLLUTANT_CONCENTRATION = 415,
+    swmm_LINK_POLLUTANT_LOAD = 416,
 } swmm_LinkProperty;
 
 typedef enum {
