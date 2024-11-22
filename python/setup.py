@@ -20,6 +20,13 @@ from skbuild import setup
 platform_system = platform.system()
 
 
+# Get the directory containing this file
+here = os.path.abspath(os.path.dirname(__file__))
+
+# Read the README file
+with open(os.path.join(here, '../README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 def get_version():
     """
     Get version from toolkit
@@ -45,6 +52,8 @@ else:
 
 setup(
     version=get_version(),
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=[
         "epaswmm",
     ],

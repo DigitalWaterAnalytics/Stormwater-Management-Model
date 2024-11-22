@@ -10,4 +10,6 @@ from .output import (
     SystemAttribute,
     SWMMOutputException,
     Output,
+    decode_swmm_datetime,
+    encode_swmm_datetime,
 )

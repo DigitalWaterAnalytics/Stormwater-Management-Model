@@ -6,7 +6,8 @@
 
 # python and cython imports
 from enum import Enum
-from typing import List, Tuple, Union, Optional, Dict, Set
+from warnings import warn
+from typing import List, Tuple, Union, Optional, Dict, Set, Callable
 from cpython.datetime cimport datetime, timedelta
 from libc.stdlib cimport free, malloc
 
@@ -18,7 +19,12 @@ cimport epaswmm.solver.solver as solver
 cimport epaswmm.epaswmm as cepaswmm
 # cython: language_level=3
 
+
+
 from epaswmm.solver.solver cimport (
+    PyEval_CallObject,
+    clock_t,
+    clock,
     swmm_Object,
     swmm_NodeType,
     swmm_LinkType,
@@ -29,7 +35,9 @@ from epaswmm.solver.solver cimport (
     swmm_SystemProperty,
     swmm_FlowUnitsProperty,
     swmm_API_Errors,
+    progress_callback,
     swmm_run,
+    swmm_run_with_callback,
     swmm_open,
     swmm_start,
     swmm_step,
@@ -51,7 +59,8 @@ from epaswmm.solver.solver cimport (
     swmm_setValue,
     swmm_getSavedValue,
     swmm_writeLine,
-    swmm_decodeDate
+    swmm_decodeDate,
+    swmm_encodeDate
 )
 
 class SWMMObjects(Enum):
@@ -359,21 +368,61 @@ class SWMMAPIErrors(Enum):
     HOTSTART_FILE_OPEN = swmm_API_Errors.ERR_API_HOTSTART_FILE_OPEN # Error opening hotstart file
     HOTSTART_FILE_FORMAT = swmm_API_Errors.ERR_API_HOTSTART_FILE_FORMAT # Invalid hotstart file format
 
-cpdef int run_solver(str inp_file, str rpt_file, str out_file):
+cdef void c_wrapper_function(double x):
     """
-    Run a SWMM simulation.
+    Wrapper function to call a Python function.
+
+    :param x: Input value
+    :type x: double
+    """
+    global py_progress_callback
+    cdef tuple args = (x,)
+    PyEval_CallObject(py_progress_callback, args)
+
+cdef progress_callback wrap_python_function_as_callback(object py_func):
+    """
+    Wrap a Python function as a callback.
+
+    :param py_func: Python function
+    :type py_func: callable
+    :return: Callback function
+    :rtype: progress_callback
+    """
+    global py_progress_callback
+    py_progress_callback = py_func
+    return <progress_callback>c_wrapper_function
+
+cdef object global_solver = None
+
+cdef void progress_callback_wrapper(double progress):
+    """
+    Wrapper function to call the instance method.
     
+    :param progress: Progress percentage
+    """
+    global solver_instance
+
+    if solver_instance is not None:
+        solver_instance.__progress_callback(progress)
+
+def run_solver(inp_file: str, rpt_file: str, out_file: str, swmm_progress_callback: Callable[[float], None] = None) -> int:
+    """
+    Run a SWMM simulation with a progress callback.
+
     :param inp_file: Input file name
     :param rpt_file: Report file name
     :param out_file: Output file name
+    :param progress_callback: Progress callback function
+    :type progress_callback: callable
     :return: Error code (0 if successful)
     """
     cdef int error_code = 0
     cdef bytes c_inp_file_bytes = inp_file.encode('utf-8')
+    cdef progress_callback c_swm_progress_callback
 
     if rpt_file is not None:
        rpt_file = inp_file.replace('.inp', '.rpt')
-    
+
     if out_file is not None:
          out_file = inp_file.replace('.inp', '.out')
 
@@ -384,11 +433,15 @@ cpdef int run_solver(str inp_file, str rpt_file, str out_file):
     cdef const char* c_rpt_file = c_rpt_file_bytes
     cdef const char* c_out_file = c_out_file_bytes
 
-    error_code = swmm_open(c_inp_file, c_rpt_file, c_out_file)
+    if swmm_progress_callback is not None:
+        c_swm_progress_callback = <progress_callback>wrap_python_function_as_callback(swmm_progress_callback)
+        error_code = swmm_run_with_callback(c_inp_file, c_rpt_file, c_out_file, c_swm_progress_callback)
+    else:
+        error_code = swmm_run(c_inp_file, c_rpt_file, c_out_file)
 
     if error_code != 0:
-        raise Exception(f'Run failed with message: {get_error_message(error_code)}')
-
+        raise SWMMSolverException(f'Run failed with message: {get_error_message(error_code)}')
+    
     return error_code
 
 cpdef datetime decode_swmm_datetime(double swmm_datetime):
@@ -404,6 +457,24 @@ cpdef datetime decode_swmm_datetime(double swmm_datetime):
     swmm_decodeDate(swmm_datetime, &year, &month, &day, &hour, &minute, &second, &day_of_week)
 
     return datetime(year, month, day, hour, minute, second)
+
+cpdef double encode_swmm_datetime(datetime dt):
+    """
+    Encode a datetime object into a SWMM datetime float value.
+
+    :param dt: datetime object
+    :type dt: datetime
+    :return: SWMM datetime float value
+    :rtype: float
+    """
+    cdef int year = dt.year
+    cdef int month = dt.month
+    cdef int day = dt.day
+    cdef int hour = dt.hour
+    cdef int minute = dt.minute
+    cdef int second = dt.second
+
+    return swmm_encodeDate(year, month, day, hour, minute, second)
 
 cpdef int version():
     """
@@ -465,6 +536,19 @@ class CallbackType(Enum):
     BEFORE_CLOSE = 11
     AFTER_CLOSE = 12
 
+class SWMMSolverException(Exception):
+    """
+    Exception class for SWMM output file processing errors.
+    """
+    def __init__(self, message: str) -> None:
+        """
+        Constructor to initialize the exception message.
+
+        :param message: Error message.
+        :type message: str
+        """
+        super().__init__(message)
+
 cdef class Solver:
     """
     A class to represent a SWMM solver.
@@ -474,18 +558,11 @@ cdef class Solver:
     cdef str _out_file
     cdef bint _save_results
     cdef int _stride_step
-    cdef list _before_initialize_callbacks
-    cdef list _before_open_callbacks
-    cdef list _after_open_callbacks
-    cdef list _before_start_callbacks
-    cdef list _after_start_callbacks
-    cdef list _before_step_callbacks
-    cdef list _before_end_callbacks
-    cdef list _after_end_callbacks
-    cdef list _before_report_callbacks
-    cdef list _after_report_callbacks
-    cdef list _before_close_callbacks
-    cdef list _after_close_callbacks
+    cdef dict _callbacks 
+    cdef int _progress_callbacks_per_second 
+    cdef list _progress_callbacks 
+    cdef clock_t _clock 
+    cdef double _total_duration
 
     def __cinit__(self, str inp_file, str rpt_file, str out_file, bint save_results=True):
         """
@@ -495,8 +572,12 @@ cdef class Solver:
         :param rpt_file: Report file name
         :param out_file: Output file name
         """
+        global global_solver
         self._save_results = save_results
         self._inp_file = inp_file
+        self._progress_callbacks_per_second = 2
+        self._clock = clock()
+        global_solver = self
 
         if rpt_file is not None:
             self._rpt_file = rpt_file
@@ -507,40 +588,40 @@ cdef class Solver:
             self._out_file = out_file
         else:
             self._out_file = inp_file.replace('.inp', '.out')
+        
+        self._stride_step = 0
 
+        self._callbacks = {
+            CallbackType.BEFORE_INITIALIZE: [],
+            CallbackType.BEFORE_OPEN: [],
+            CallbackType.AFTER_OPEN: [],
+            CallbackType.BEFORE_START: [],
+            CallbackType.AFTER_START: [],
+            CallbackType.BEFORE_STEP: [],
+            CallbackType.AFTER_STEP: [],
+            CallbackType.BEFORE_END: [],
+            CallbackType.AFTER_END: [],
+        }
         self._solver_state = SolverState.CREATED
 
     def __enter__(self):
         """
         Enter method for context manager.
         """
-        if (
-            (self._solver_state != SolverState.CREATED) or 
-            (self._solver_state != SolverState.CLOSED)
-            ):
-            raise Exception('')
-        else:
-            self.initialize()
-        
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
         Exit method for context manager.
         """
-        self.__close()
-
-    def __close(self):
-        """
-        Close the solver.
-        """
-        pass
+        self.finalize()
 
     def __dealloc__(self):
         """
         Destructor to free the solver.
         """
-        pass
+        self.finalize()
 
     def __iter__(self):
         """
@@ -552,28 +633,60 @@ cdef class Solver:
         """
         Next method for the solver.
         """
-        pass
+        if self._solver_state == SolverState.FINISHED:
+            raise StopIteration
+        else:
+            return self.step()
 
     @property
-    def start_date(self) -> datetime:
+    def start_datetime(self) -> datetime:
         """
         Get the start date of the simulation.
         
         :return: Start date
         :rtype: datetime
         """
-        pass
+        cdef double start_date = swmm_getValue(SWMMSystemProperties.START_DATE.value, 0)
+        return cepaswmm.decode_swmm_datetime(start_date)
+
+    @start_datetime.setter
+    def start_datetime(self, sim_start_datetime: datetime) -> None:
+        """
+        Initialize the solver.
+        
+        :param sim_start_datetime: Start date of the simulation
+        :return: Error code (0 if successful)
+        """
+        cdef double start_date = cepaswmm.encode_swmm_datetime(sim_start_datetime)
+        cdef int error_code = swmm_setValue(SWMMSystemProperties.START_DATE.value, 0, start_date)
+
+        self.__validate_error(error_code)
+
 
     @property
-    def end_date(self) -> datetime:
+    def end_datetime(self) -> datetime:
         """
         Get the end date of the simulation.
         
         :return: End date
         :rtype: datetime
         """
-        pass
-    
+        cdef double end_date = swmm_getValue(SWMMSystemProperties.END_DATE.value, 0)
+        return cepaswmm.decode_swmm_datetime(end_date)
+
+    @property.setter
+    def end_datetime(self, sim_end_datetime: datetime) -> None:
+        """
+        Set the end date of the simulation.
+        
+        :param sim_end_datetime: End date of the simulation
+        :return: Error code (0 if successful)
+        """
+        cdef double end_date = cepaswmm.encode_swmm_datetime(sim_end_datetime)
+        cdef int error_code = swmm_setValue(SWMMSystemProperties.END_DATE.value, 0, end_date)
+
+        self.__validate_error(error_code)
+
     @property
     def current_date(self) -> datetime:
         """
@@ -582,7 +695,32 @@ cdef class Solver:
         :return: Current date
         :rtype: datetime
         """
-        pass
+        cdef double current_date = swmm_getValue(SWMMSystemProperties.CURRENT_DATE.value, 0)
+        return cepaswmm.decode_swmm_datetime(current_date)
+    
+    def set_value(self, property_type: SWMMObjects, index: int, value: double) -> None:
+        """
+        Set a SWMM system property value.
+        
+        :param property_type: System property type
+        :type property_type: SWMMSystemProperties
+        :param value: Property value
+        :type value: double
+        """
+        cdef int error_code = swmm_setValue(property_type.value, index, value)
+        self.__validate_error(error_code)
+
+    def get_value(self, property_type: SWMMObjects, index: int):
+        """
+        Get a SWMM system property value.
+        
+        :param property_type: System property type
+        :type property_type: SWMMSystemProperties
+        :return: Property value
+        :rtype: double
+        """
+        cdef double value = swmm_getValue(property_type.value, index)
+        return value
     
     @property
     def stride_step(self) -> int:
@@ -604,7 +742,215 @@ cdef class Solver:
         """
         pass
 
-    def __validate_error(self, error_code: int) -> None:
+    def add_callback(self, callback_type: CallbackType, callback: Callable[[Solver], None]) -> None:
+        """
+        Add a callback to the solver.
+        
+        :param callback_type: Type of callback
+        :type callback_type: CallbackType
+        :param callback: Callback function
+        :type callback: callable
+        """
+        self._callbacks[callback_type].append(callback)
+
+    def add_progress_callback(self, callback: Callable[[double], None]) -> None:
+        """
+        Add a progress callback to the solver.
+        
+        :param callback: Progress callback function
+        :type callback: callable
+        """
+        self._progress_callbacks.append(callback)
+
+    cpdef void initialize(self):
+        """
+        Initialize the solver.
+        
+        :param inp_file: Input file name
+        :param rpt_file: Report file name
+        :param out_file: Output file name
+
+        """
+        cdef error_code = 0
+        self._clock = clock()
+
+        cdef bytes c_inp_file_bytes = self._inp_file.encode('utf-8')
+        cdef bytes c_rpt_file_bytes = self._rpt_file.encode('utf-8')
+        cdef bytes c_out_file_bytes = self._out_file.encode('utf-8')
+
+        cdef const char* c_inp_file = c_inp_file_bytes
+        cdef const char* c_rpt_file = c_rpt_file_bytes
+        cdef const char* c_out_file = c_out_file_bytes
+
+        if (
+            (self._solver_state != SolverState.CREATED) or 
+            (self._solver_state != SolverState.CLOSED)
+            ):
+            raise SWMMSolverException(f'Initialize failed: Solver is not in a valid state: {self._solver_state}')
+        else:
+
+            self.__execute_callbacks(CallbackType.BEFORE_INITIALIZE)
+            self.__execute_callbacks(CallbackType.BEFORE_OPEN)
+            error_code = swmm_open(c_inp_file, c_rpt_file, c_out_file)
+            self.__validate_error(error_code)
+            self._solver_state = SolverState.OPEN
+            self.__execute_callbacks(CallbackType.AFTER_OPEN)
+
+            self.__execute_callbacks(CallbackType.BEFORE_START)
+            error_code = swmm_start(self._save_results)
+            self.__validate_error(error_code)
+            self._solver_state = SolverState.STARTED
+            self.__execute_callbacks(CallbackType.AFTER_START)
+        
+        self._total_duration = swmm_getValue(SWMMSystemProperties.END_DATE.value, 0) - swmm_getValue(SWMMSystemProperties.START_DATE.value, 0)
+            
+    cpdef double step(self):
+        """
+        Step a SWMM simulation.
+        
+        :return: Error code (0 if successful)
+        """
+        cdef double elapsed_time = 0.0
+        cdef double progress = 0.0
+
+        if self._stride_step > 0:
+            error_code = swmm_stride(self._stride_step, &elapsed_time)
+        else:
+            error_code = swmm_step(&elapsed_time)
+
+        self.__validate_error(error_code)
+        
+        progress = (swmm_getValue(SWMMSystemProperties.CURRENT_DATE.value, 0) - self._total_duration) / self._total_duration
+        self.__execute_progress_callbacks(progress)
+
+        if elapsed_time <= 0.0:
+            self._solver_state = SolverState.FINISHED
+
+        return elapsed_time
+
+    cpdef void finalize(self):
+        """
+        Finalize the solver.
+        """
+        cdef int error_code = 0
+
+        if self._solver_state == SolverState.OPEN or self._solver_state == SolverState.STARTED or self._solver_state == SolverState.FINISHED:
+            self.__execute_callbacks(CallbackType.BEFORE_END)
+            error_code = self.swmm_end()
+            self.__validate_error(error_code)
+            self._solver_state = SolverState.ENDED
+            self.__execute_callbacks(CallbackType.AFTER_END)
+
+            self.__execute_callbacks(CallbackType.BEFORE_REPORT)
+            error_code = self.swmm_report()
+            self.__validate_error(error_code)
+            self._solver_state = SolverState.REPORTED
+            self.__execute_callbacks(CallbackType.AFTER_REPORT)
+
+            self.__execute_callbacks(CallbackType.BEFORE_CLOSE)
+            error_code = self.swmm_close()
+            self.__validate_error(error_code)
+            self._solver_state = SolverState.CLOSED
+            self.__execute_callbacks(CallbackType.AFTER_CLOSE)
+
+    cpdef void execute(self):
+        """
+        Run the solver to completion.
+        
+        :return: Error code (0 if successful)
+        """
+        cdef int error_code = 0
+        cdef progress_callback swmm_progress_callback = <progress_callback>progress_callback_wrapper
+        cdef bytes c_inp_file_bytes = self._inp_file.encode('utf-8')
+        cdef bytes c_rpt_file_bytes = self._rpt_file.encode('utf-8')
+        cdef bytes c_out_file_bytes = self._out_file.encode('utf-8')
+
+        cdef const char* c_inp_file = c_inp_file_bytes
+        cdef const char* c_rpt_file = c_rpt_file_bytes
+        cdef const char* c_out_file = c_out_file_bytes
+
+        if (
+            (self._solver_state != SolverState.CREATED) or 
+            (self._solver_state != SolverState.CLOSED)
+        ):
+            raise SWMMSolverException(f'Solver is not in a valid state: {self._solver_state}')
+        else:
+            if len(self.__execute_progress_callbacks) > 0:
+                error_code = swmm_run_with_callback(c_inp_file, c_rpt_file, c_out_file, swmm_progress_callback)
+            else:
+                error_code = swmm_run(c_inp_file, c_rpt_file, c_out_file)
+
+    cpdef void use_hotstart(self, str hotstart_file):
+        """
+        Use a hotstart file.
+        
+        :param hotstart_file: Hotstart file name
+        """
+        cdef bytes c_hotstart_file = hotstart_file.encode('utf-8')
+        cdef const char* cc_hotstart_file = c_hotstart_file
+        cdef int error_code = swmm_useHotStart(cc_hotstart_file)
+
+        self.__validate_error(error_code)
+    
+    cpdef void save_hotstart(self, str hotstart_file):
+        """
+        Save a hotstart file.
+        
+        :param hotstart_file: Hotstart file name
+        """
+        cdef bytes c_hotstart_file = hotstart_file.encode('utf-8')
+        cdef const char* cc_hotstart_file = c_hotstart_file
+        cdef int error_code = swmm_saveHotStart(cc_hotstart_file)
+
+        self.__validate_error(error_code)
+
+    def get_mass_balance_error(self) -> Tuple[float, float, float]:
+        """
+        Get the mass balance error.
+        
+        :return: Mass balance error
+        :rtype: Tuple[float, float, float]
+        """
+        cdef int error_code = 0
+        cdef float runoffErr, flowErr, qualErr
+
+        swmm_getMassBalErr(&runoffErr, &flowErr, &qualErr)
+        self.__validate_error(error_code)
+
+    def __execute_callbacks(self, callback_type: CallbackType) -> None:
+        """
+        Execute the callbacks for the given type.
+        
+        :param callback_type: Type of callback
+        :type callback_type: CallbackType
+        """
+        for callback in self._callbacks[callback_type]:
+            callback(self)
+
+    cpdef void __execute_progress_callbacks(self, double percent_complete):
+        """
+        Execute the progress callbacks.
+        
+        :param percent_complete: Percent complete
+        :type percent_complete: float
+        """
+        for callback in self._progress_callbacks:
+            callback(percent_complete)
+
+    cdef void __progress_callback(self, double percent_complete):
+        """
+        Progress callback for the solver.
+        
+        :param percent_complete: Percent complete
+        :type percent_complete: float
+        """
+        cdef clock_t elapsed_time =   clock() - self._clock
+
+        if elapsed_time > 1.0 / self._progress_callbacks_per_second:
+            self.__execute_progress_callbacks(percent_complete)
+            self._clock = clock()
+
+    cpdef void __validate_error(self, error_code: int) :
         """
         Validate the error code and raise an exception if it is not 0.
         
@@ -612,18 +958,9 @@ cdef class Solver:
         :type error_code: int
         """
         if error_code != 0:
-            raise Exception(f'Run failed with message: {self.__get_error()}')
-    
-    def status(self) -> SolverState:
-        """
-        Get the status of the solver.
-        
-        :return: Solver state
-        :rtype: SolverState
-        """
-        pass
+            raise SWMMSolverException(f'SWMM failed with message: {self.__get_error()}')
 
-    cpdef str __get_error(self):
+    cdef str __get_error(self):
         """
         Get the error code from the solver.
         
@@ -639,79 +976,4 @@ cdef class Solver:
 
         return error_message
 
-    def __initialize(self) -> int:
-        """
-        Open a SWMM input file.
-        
-        :param inp_file: Input file name
-        :param rpt_file: Report file name
-        :param out_file: Output file name
-        :return: Error code (0 if successful)
-        """
-        cdef error_code = 0
 
-        cdef bytes c_inp_file_bytes = self._inp_file.encode('utf-8')
-        cdef bytes c_rpt_file_bytes = self._rpt_file.encode('utf-8')
-        cdef bytes c_out_file_bytes = self._out_file.encode('utf-8')
-
-        cdef const char* c_inp_file = c_inp_file_bytes
-        cdef const char* c_rpt_file = c_rpt_file_bytes
-        cdef const char* c_out_file = c_out_file_bytes
-
-        error_code = swmm_open(c_inp_file, c_rpt_file, c_out_file)
-        self.__validate_error(error_code)
-
-    def __finalize(self) -> int:
-        """
-        Close a SWMM input file.
-        
-        :return: Error code (0 if successful)
-        """
-        cdef error_code = 0
-
-        error_code = swmm_close()
-        self.__validate_error(error_code)
-
-    def __start(self, save_hotstart: bool) -> int:
-        """
-        Start a SWMM simulation.
-        
-        :param save_hotstart: Flag to save hotstart file
-        :return: Error code (0 if successful)
-        """
-        pass
-
-    def step(self) -> datetime:
-        """
-        Step a SWMM simulation.
-        
-        :return: Error code (0 if successful)
-        """
-        pass 
-
-    def step_stride(self, stride: int) -> int:
-        """
-        Stride a SWMM simulation.
-        
-        :param stride: Number of steps to stride
-        :return: Error code (0 if successful)
-        """
-        pass
-
-    def use_hotstart(self, hotstart_file: str) -> int:
-        """
-        Use a hotstart file.
-        
-        :param hotstart_file: Hotstart file name
-        :return: Error code (0 if successful)
-        """
-        pass
-    
-    def save_hotstart(self, hotstart_file: str) -> int:
-        """
-        Save a hotstart file.
-        
-        :param hotstart_file: Hotstart file name
-        :return: Error code (0 if successful)
-        """
-        pass

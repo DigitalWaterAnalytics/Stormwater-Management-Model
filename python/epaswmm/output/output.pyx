@@ -18,6 +18,11 @@ cimport epaswmm.epaswmm as cepaswmm
 cimport epaswmm.output.output as coutput
 
 from epaswmm.output.output cimport (
+    # DateTime,
+    # datetime_encodeDate,
+    # datetime_encodeTime,
+    # datetime_decodeDate,
+    # datetime_decodeTime,
     SMO_unitSystem, 
     SMO_flowUnits, 
     SMO_concUnits, 
@@ -53,7 +58,7 @@ from epaswmm.output.output cimport (
     SMO_getSystemResult,
     SMO_free,
     SMO_clearError,
-    SMO_checkError,
+    SMO_checkError
 )
 
 class UnitSystem(Enum):

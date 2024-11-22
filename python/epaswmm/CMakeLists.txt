@@ -20,5 +20,5 @@ target_include_directories(
 )
 
 # Add subdirectories
-add_subdirectory(output)
 add_subdirectory(solver)
+add_subdirectory(output)

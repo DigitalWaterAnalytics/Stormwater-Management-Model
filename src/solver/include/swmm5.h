@@ -206,8 +206,10 @@ typedef enum {
     ERR_API_HOTSTART_FILE_FORMAT= -999911,
 } swmm_API_Errors;
 
+typedef void (*progress_callback)(double progress);
 
 int    DLLEXPORT swmm_run(const char *inputFile, const char *reportFile, const char *outputFile);
+int    DLLEXPORT swmm_run_with_callback(const char *inputFile, const char *reportFile, const char *outputFile, progress_callback callback);
 int    DLLEXPORT swmm_open(const char *inputFile, const char *reportFile, const char *outputFile);
 int    DLLEXPORT swmm_start(int saveFlag);
 int    DLLEXPORT swmm_step(double *elapsedTime);
@@ -233,6 +235,9 @@ double DLLEXPORT swmm_getSavedValue(int property, int index, int period);
 void   DLLEXPORT swmm_writeLine(const char *line);
 void   DLLEXPORT swmm_decodeDate(double date, int *year, int *month, int *day,
                  int *hour, int *minute, int *second, int *dayOfWeek);
+double DLLEXPORT swmm_encodeDate(int year, int month, int day,
+                 int hour, int minute, int second);
+
 
 #ifdef __cplusplus 
 }   // matches the linkage specification from above */ 

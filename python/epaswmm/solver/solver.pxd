@@ -3,6 +3,13 @@
 # Created on: 2024-11-19
 
 # cython: language_level=3
+cdef extern from "Python.h":
+    object PyEval_CallObject(object, object)
+
+cdef extern from "time.h":
+    ctypedef long clock_t
+    clock_t clock()
+
 cdef extern from "swmm5.h":
     # SWMM object type enumeration
     ctypedef enum swmm_Object:
@@ -162,13 +169,24 @@ cdef extern from "swmm5.h":
         ERR_API_HOTSTART_FILE_OPEN # Error opening hotstart file
         ERR_API_HOTSTART_FILE_FORMAT # Invalid hotstart file format
 
+    # SWMM API function return simulation progress
+    ctypedef void (*progress_callback)(double progress); 
 
     # SWMM API function prototypes
     # param: inp_file: input file name
     # param: rpt_file: report file name
-    # parm: out_file: output file name
+    # param: out_file: output file name
     # Returns: error code (0 if successful)
     cdef int swmm_run(char* inp_file, char* rpt_file, char* out_file)
+
+
+    # SWMM API function prototypes
+    # param: inp_file: input file name
+    # param: rpt_file: report file name
+    # param: out_file: output file name
+    # param: progress: progress callback
+    # Returns: error code (0 if successful)
+    cdef int swmm_run_with_callback(char* inp_file, char* rpt_file, char* out_file, progress_callback progress)
 
     # Open a SWMM input file
     # param: inp_file: input file name
@@ -279,3 +297,6 @@ cdef extern from "swmm5.h":
 
     # Decodes a SWMM datetime into a datetime object    
     cdef void swmm_decodeDate(double date, int *year, int *month, int *day, int *hour, int *minute, int *second, int *dayOfWeek)
+
+    # Encodes a datetime object into a SWMM datetime
+    cdef double swmm_encodeDate(int year, int month, int day, int hour, int minute, int second)

@@ -2,15 +2,15 @@
 //   consts.h
 //
 //   Project: EPA SWMM5
-//   Version: 5.2
-//   Date:    07/15/23  (Build 5.2.4)
+//   Version: 5.3
+//   Date:    07/15/23  (Build 5.3.0)
 //   Author:  L. Rossman
 //
 //   Various Constants
 //   
 //   Update history
 //   ==============
-//   Biuld 5.3.0
+//   Build 5.3.0
 //   - Added MAXHOTSTARTFILES constant to support saving multiple hotstart files
 //	   at different times.
 // 

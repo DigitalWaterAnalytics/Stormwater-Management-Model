@@ -16,10 +16,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "epaswmm"
 description = "A python package for EPA SWMM5 preprocessing, solver, and post-processing."
-readme = {file = "README.md",content-type = "text/markdown"}
+# readme = {file = "./../README.md", content-type = "text/markdown"}
+#specify dynamic readme from setup.py
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 keywords = ["SWMM", "stormwater", "modeling", "water", "hydrology", "hydraulics", "wastewater"]
 
 authors = [

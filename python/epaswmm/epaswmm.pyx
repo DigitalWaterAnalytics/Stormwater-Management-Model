@@ -144,7 +144,7 @@ cpdef datetime decode_swmm_datetime(double swmm_datetime):
         day = d + 1
 
     secs = (int)(math.floor(fracDay + 0.5))
-    
+
     if  secs >= 86400:
         secs = 86399
 

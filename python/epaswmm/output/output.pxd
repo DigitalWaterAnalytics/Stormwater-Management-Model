@@ -3,9 +3,12 @@
 # Created on: 2024-11-19
 
 # cython: language_level=3
+# SWMM datetime encode decoder functions (not very elegant/need to fix later)
+# cdef extern from "datetime.h"
 
 # SWMM output enumeration types.
 cdef extern from "swmm_output_enums.h":
+
     # Unit system used in the output file
     ctypedef enum SMO_unitSystem:
         SMO_US # US customary units

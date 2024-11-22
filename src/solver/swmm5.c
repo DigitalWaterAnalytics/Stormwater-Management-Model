@@ -258,6 +258,70 @@ int DLLEXPORT swmm_run(const char* inputFile, const char* reportFile, const char
 
 //=============================================================================
 
+int DLLEXPORT swmm_run_with_callback(const char* inputFile, const char* reportFile, const char* outputFile, progress_callback callback)
+//
+//  Input:   inputFile = name of input file
+//           reportFile = name of report file
+//           outputFile = name of binary output file
+//           callback = function pointer to a progress callback function
+//  Output:  returns error code
+//  Purpose: runs a SWMM simulation.
+//
+{
+    double progress = 0.0, elapsedTime = 0.0;
+
+    // --- initialize flags
+    IsOpenFlag = FALSE;
+    IsStartedFlag = FALSE;
+    SaveResultsFlag = TRUE;
+
+    // --- open the files & read input data
+    ErrorCode = 0;
+
+    swmm_open(inputFile, reportFile, outputFile);
+
+    // --- run the simulation if input data OK
+    if ( !ErrorCode )
+    {
+        // --- initialize values
+        swmm_start(TRUE);
+
+        // --- execute each time step until elapsed time is re-set to 0
+        if ( !ErrorCode )
+        {
+            do
+            {
+                swmm_step(&elapsedTime);
+
+                // --- calculate progress
+                if (callback != NULL)
+                {
+                    progress = NewRoutingTime / TotalDuration;
+                    callback(progress);
+                }
+
+            } while ( elapsedTime > 0.0 && !ErrorCode );
+        }
+
+        // --- clean up
+        swmm_end();
+    }
+
+    // --- report results
+    if ( !ErrorCode && Fout.mode == SCRATCH_FILE )
+    {
+        swmm_report();
+    }
+
+    // --- close the system
+    swmm_close();
+
+    return ErrorCode;
+}
+
+
+//=============================================================================
+
 int DLLEXPORT swmm_open(const char* inputFile, const char* reportFile, const char* outputFile)
 //
 //  Input:   inputFile  = name of input file
@@ -1063,6 +1127,20 @@ void DLLEXPORT swmm_decodeDate(double date, int *year, int *month, int *day,
     datetime_decodeTime(date, hour, minute, second);
     *dayOfWeek = datetime_dayOfWeek(date);
 }
+
+//=============================================================================
+
+double DLLEXPORT swmm_encodeDate(int year, int month, int day,
+      int hour, int minute, int second)
+//
+//  Input:  date's year, month of year, day of month, time of day (hour,
+//           minute, second), and day of weeek
+//  Output: date = an encoded date in decimal days
+//  Purpose: retrieves the calendar date and clock time of a decoded date.
+{   
+    return datetime_encodeDate(year, month, day) + datetime_encodeTime(hour, minute, second);
+}
+
 
 //=============================================================================
 //   Object property getters and setters

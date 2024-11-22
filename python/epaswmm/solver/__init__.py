@@ -14,7 +14,8 @@ from .solver import (
     SWMMAPIErrors,
     run_solver,
     decode_swmm_datetime,
+    encode_swmm_datetime,
     version,
     SolverState,
-    Solver,
+    Solver
 )
