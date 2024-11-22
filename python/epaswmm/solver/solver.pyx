@@ -674,7 +674,7 @@ cdef class Solver:
         cdef double end_date = swmm_getValue(SWMMSystemProperties.END_DATE.value, 0)
         return cepaswmm.decode_swmm_datetime(end_date)
 
-    @property.setter
+    @end_datetime.setter
     def end_datetime(self, sim_end_datetime: datetime) -> None:
         """
         Set the end date of the simulation.
