@@ -58,6 +58,7 @@
 //  - Refactored TRptFlags struct.
 //  Build 5.3.0:
 //  - Modified TFile to support specification of time for saving hotstart files.
+//  - Adding support for API provided pollutant fluxes and inflows.
 //-----------------------------------------------------------------------------
 
 #ifndef OBJECTS_H
@@ -392,6 +393,7 @@ typedef struct
    double        slope;           // slope (ft/ft)
    double        curbLength;      // total curb length (ft)
    double*       initBuildup;     // initial pollutant buildup (mass/ft2)
+   double*       apiExtBuildup;   // build up flux from API (mass/ft2)
    TLandFactor*  landFactor;      // array of land use factors
    TGroundwater* groundwater;     // associated groundwater data
    MathExpr*     gwLatFlowExpr;   // user-supplied lateral outflow expression
@@ -403,6 +405,8 @@ typedef struct
    //-----------------------------
    double        lidArea;         // area devoted to LIDs (ft2)
    double        rainfall;        // current rainfall (ft/sec)
+   double        apiRainfall;     // api provided rainfall (ft/sec)
+   double        apiSnowfall;     // api provided snowfall (ft/sec)
    double        evapLoss;        // current evap losses (ft/sec)
    double        infilLoss;       // current infil losses (ft/sec) 
    double        runon;           // runon from other subcatchments (cfs)
@@ -524,11 +528,11 @@ typedef struct
    double        newLatFlow;      // current lateral inflow (cfs)
    double*       oldQual;         // previous quality state
    double*       newQual;         // current quality state
+   double*       apiExtQualMassFlux;  // pollutant mass flux from swmm_setValue function (mass/sec)
    double        oldFlowInflow;   // previous flow inflow
    double        oldNetInflow;    // previous net inflow
    double        qualInflow;      // inflow seen for quality routing (cfs)
    double        apiExtInflow;    // inflow from swmm_setValue function (cfs)
-
 }  TNode;
 
 //---------------
@@ -706,6 +710,7 @@ typedef struct
    char          bypassed;        // bypass dynwave calc. flag
    char          normalFlow;      // normal flow limited flag
    char          inletControl;    // culvert inlet control flag
+   double*       apiExtQualMassFlux;  // pollutant mass flux from swmm_setValue function (mass/sec)
 }  TLink;
 
 //---------------

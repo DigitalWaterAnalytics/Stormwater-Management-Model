@@ -20,6 +20,11 @@ class TestSWMMSolver(unittest.TestCase):
 
     @staticmethod
     def progress_callback(progress: float) -> None:
+        """
+        Progress callback function for the SWMM solver
+        :param progress:
+        :return:
+        """
         assert 0 <= progress <= 1.0
 
     def test_get_swmm_version(self):
@@ -49,6 +54,11 @@ class TestSWMMSolver(unittest.TestCase):
         self.assertEqual(swmm_datetime, datetime(year=2024, month=11, day=16, hour=13, minute=33, second=21))
 
     def test_run_solver(self):
+        """
+        Run the SWMM solver to solve the example input file
+
+        :return:
+        """
         error = solver.run_solver(
             inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
             rpt_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".rpt"),
@@ -58,6 +68,11 @@ class TestSWMMSolver(unittest.TestCase):
         self.assertEqual(error, 0, "SWMM solver run successfully.")
 
     def test_run_solver_with_progress_callback(self):
+        """
+        Run the SWMM solver to solve the example input file with progress callback
+
+        :return:
+        """
         error = solver.run_solver(
             inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
             rpt_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".rpt"),
@@ -68,6 +83,10 @@ class TestSWMMSolver(unittest.TestCase):
         self.assertEqual(error, 0, "SWMM solver with callbacks run successfully.")
 
     def test_run_solver_invalid_inp_file(self):
+        """
+        Run the SWMM solver with an invalid input file path to test error handling
+        :return:
+        """
         with self.assertRaises(Exception) as context:
             error = solver.run_solver(
                 inp_file=example_solver_data.NON_EXISTENT_INPUT_FILE,
@@ -76,3 +95,69 @@ class TestSWMMSolver(unittest.TestCase):
             )
 
         self.assertIn('ERROR 303: cannot open input file.', str(context.exception))
+
+    def test_run_without_context_manager(self):
+        """
+        Run the SWMM solver without a context manager
+        :return:
+        """
+
+        swmm_solver = solver.Solver(
+            inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+            rpt_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".rpt"),
+            out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        )
+
+        swmm_solver.execute()
+
+    def test_run_without_context_manager_step_by_step(self):
+        """
+        Run the SWMM solver without a context manager and an invalid input file path to test error handling
+        :return:
+        """
+
+        swmm_solver = solver.Solver(
+            inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+            rpt_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".rpt"),
+            out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        )
+
+        swmm_solver.initialize()
+
+        while swmm_solver.solver_state != solver.SolverState.FINISHED:
+            swmm_solver.step()
+
+        swmm_solver.finalize()
+
+    def test_run_solver_with_context_manager(self):
+        """
+        Run the SWMM solver with an invalid report file path to test error handling
+        :return:
+        """
+
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.NON_EXISTENT_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        ) as swmm_solver:
+            swmm_solver.initialize()
+
+            for t in swmm_solver:
+                pass
+
+    def test_solver_get_time_attributes(self):
+        """
+        Test the get_start_date function of the SWMM solver
+        :return:
+        """
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out")
+        ) as swmm_solver:
+
+            swmm_solver.initialize()
+
+            start_date = swmm_solver.start_datetime
+
+            self.assertEqual(start_date, datetime(year=1998, month=1, day=1))

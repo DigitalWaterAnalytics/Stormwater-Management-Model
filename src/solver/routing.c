@@ -494,6 +494,18 @@ void addExternalInflows(DateTime currentDate)
             }
             inflow = inflow->next;
         }
+
+        // --- add api mass fluxes to node's inflow
+        for (p = 0; p < Nobjects[POLLUT]; p++)
+        {
+            w = Node[j].apiExtQualMassFlux[p];
+
+            if (w > 0.0)
+            {
+                Node[j].newQual[p] += w;
+                massbal_addInflowQual(EXTERNAL_INFLOW, p, w);
+            }
+        }
     }
 }
 

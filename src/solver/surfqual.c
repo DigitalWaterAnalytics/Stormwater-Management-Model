@@ -77,6 +77,7 @@ void surfqual_initState(int j)
         Subcatch[j].oldQual[p] = 0.0;
         Subcatch[j].newQual[p] = 0.0;
         Subcatch[j].pondedQual[p] = 0.0;
+        Subcatch[j].apiExtBuildup[p] = 0.0;
     }
 
     // --- initialize pollutant buildup
@@ -125,6 +126,10 @@ void surfqual_getBuildup(int j, double tStep)
             newBuildup = landuse_getBuildup(i, p, area, curb, oldBuildup,
                          tStep);
             newBuildup = MAX(newBuildup, oldBuildup);
+
+            //--- add bounded building from external API
+            newBuildup = max(0.0, newBuildup + Subcatch[j].apiExtBuildup[p] * area);
+
             Subcatch[j].landFactor[i].buildup[p] = newBuildup;
             massbal_updateLoadingTotals(BUILDUP_LOAD, p, 
                                        (newBuildup - oldBuildup));

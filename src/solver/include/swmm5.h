@@ -94,10 +94,16 @@ typedef enum {
     swmm_SUBCATCH_INFIL     = 204,
     swmm_SUBCATCH_RUNOFF    = 205,
     swmm_SUBCATCH_RPTFLAG   = 206,
-    swmm_SUBCATCH_POLLUTANT_BUILDUP  = 207,
-    swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION = 208,
-    swmm_SUBCATCH_POLLUTANT_RUNOFF_CONCENTRATION = 209,
-    swmm_SUBCATCH_POLLUTANT_TOTAL_LOAD = 210,
+    swmm_SUBCATCH_WIDTH     = 207,
+    swmm_SUBCATCH_SLOPE     = 208,
+    swmm_SUBCATCH_CURB_LENGTH = 209,
+    swmm_SUBCATCH_API_RAINFALL = 210,
+    swmm_SUBCATCH_API_SNOWFALL = 211,
+    swmm_SUBCATCH_POLLUTANT_BUILDUP  = 212,
+    swmm_SUBCATCH_EXTERNAL_POLLUTANT_BUILDUP = 213,
+    swmm_SUBCATCH_POLLUTANT_RUNOFF_CONCENTRATION = 214,
+    swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION = 215,
+    swmm_SUBCATCH_POLLUTANT_TOTAL_LOAD = 216,
 } swmm_SubcatchProperty;
 
 typedef enum {
@@ -111,8 +117,11 @@ typedef enum {
     swmm_NODE_INFLOW   = 307,
     swmm_NODE_OVERFLOW = 308,
     swmm_NODE_RPTFLAG  = 309,
-    swmm_NODE_POLLUTANT_CONCENTRATION = 310,
-    swmm_NODE_POLLUTANT_INFLOW_CONCENTRATION = 311,
+    swmm_NODE_SURCHARGE_DEPTH = 310,
+    swmm_NODE_PONDED_AREA = 311,
+    swmm_NODE_INITIAL_DEPTH = 312,
+    swmm_NODE_POLLUTANT_CONCENTRATION = 313,
+    swmm_NODE_POLLUTANT_LATMASS_FLUX = 314,
 } swmm_NodeProperty;
 
 typedef enum {
@@ -131,8 +140,18 @@ typedef enum {
     swmm_LINK_VELOCITY   = 412,
     swmm_LINK_TOPWIDTH   = 413,
     swmm_LINK_RPTFLAG    = 414,
-    swmm_LINK_POLLUTANT_CONCENTRATION = 415,
-    swmm_LINK_POLLUTANT_LOAD = 416,
+    swmm_LINK_OFFSET1    = 415,
+    swmm_LINK_OFFSET2    = 416,
+    swmm_LINK_INITIAL_FLOW = 417,
+    swmm_LINK_FLOW_LIMIT = 418,
+    swmm_LINK_INLET_LOSS = 419,
+    swmm_LINK_OUTLET_LOSS = 420,
+    swmm_LINK_AVERAGE_LOSS = 421,
+    swmm_LINK_SEEPAGE_RATE = 422,
+    swmm_LINK_HAS_FLAPGATE = 423,
+    swmm_LINK_POLLUTANT_CONCENTRATION = 424,
+    swmm_LINK_POLLUTANT_LOAD = 425,
+    swmm_LINK_POLLUTANT_LATMASS_FLUX = 426,
 } swmm_LinkProperty;
 
 typedef enum {
@@ -156,7 +175,7 @@ typedef enum {
     swmm_IGNORERAINFALL = 17,
     swmm_IGNORERDII = 18,
     swmm_IGNORESNOWMELT = 19,
-    swmm_IGNOREGWATER = 20,
+    swmm_IGNOREGROUNDWATER = 20,
     swmm_IGNOREROUTING = 21,
     swmm_IGNOREQUALITY = 22,
     swmm_RULESTEP= 23,
@@ -176,7 +195,6 @@ typedef enum {
     swmm_HEADTOL = 37,
     swmm_SYSFLOWTOL = 38,
     swmm_LATFLOWTOL = 39,
-
 } swmm_SystemProperty;
 
 
@@ -204,6 +222,7 @@ typedef enum {
     ERR_API_TIME_PERIOD = -999909,
     ERR_API_HOTSTART_FILE_OPEN = -999910,
     ERR_API_HOTSTART_FILE_FORMAT= -999911,
+    ERR_API_IS_RUNNING = -999912,
 } swmm_API_Errors;
 
 typedef void (*progress_callback)(double progress);
@@ -230,7 +249,9 @@ int    DLLEXPORT swmm_getCount(int objType);
 int    DLLEXPORT swmm_getName(int objType, int index, char *name, int size);
 int    DLLEXPORT swmm_getIndex(int objType, const char *name);
 double DLLEXPORT swmm_getValue(int property, int index);
+double DLLEXPORT swmm_getValueExpanded(int objType, int property, int index, int subIndex);
 int    DLLEXPORT swmm_setValue(int property, int index,  double value);
+int    DLLEXPORT swmm_setValueExpanded(int objType, int property, int index, int subIndex, double value);
 double DLLEXPORT swmm_getSavedValue(int property, int index, int period);
 void   DLLEXPORT swmm_writeLine(const char *line);
 void   DLLEXPORT swmm_decodeDate(double date, int *year, int *month, int *day,

@@ -39,6 +39,7 @@
 //   - Only pervious area depression storage receives monthly adjustment.
 //   Build 5.3.0:
 //   - Modified to use global constants defined in consts.h.
+//   - Add api provided rainfall and snowfall to subcatchment's rainfall.
 //-----------------------------------------------------------------------------
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -435,6 +436,9 @@ void  subcatch_initState(int j)
     Subcatch[j].runon = 0.0;
     Subcatch[j].evapLoss = 0.0;
     Subcatch[j].infilLoss = 0.0;
+    Subcatch[j].apiRainfall = 0.0;
+    Subcatch[j].apiSnowfall = 0.0;
+
 
     // --- initialize state of infiltration, groundwater, & snow pack objects
     if ( Subcatch[j].infil == j )  infil_initState(j);
@@ -778,6 +782,9 @@ void getNetPrecip(int j, double* netPrecip, double tStep)
     {
         gage_getPrecip(k, &rainfall, &snowfall);
     }
+
+    rainfall += Subcatch[j].apiRainfall;
+    snowfall += Subcatch[j].apiSnowfall;
 
     // --- assign total precip. rate to subcatch's rainfall property
     Subcatch[j].rainfall = rainfall + snowfall;

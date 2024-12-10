@@ -166,6 +166,7 @@ S6               Commercial       100
 [LOADINGS]
 ;;Subcatchment   Pollutant        Buildup   
 ;;-------------- ---------------- ----------
+S1               TSS              100       
 
 [BUILDUP]
 ;;Land Use       Pollutant        Function   Coeff1     Coeff2     Coeff3     Per Unit  

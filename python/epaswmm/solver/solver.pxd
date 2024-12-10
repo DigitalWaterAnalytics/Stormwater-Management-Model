@@ -63,9 +63,15 @@ cdef extern from "swmm5.h":
         swmm_SUBCATCH_INFIL     # Infiltration
         swmm_SUBCATCH_RUNOFF    # Runoff
         swmm_SUBCATCH_RPTFLAG   # Reporting flag
+        swmm_SUBCATCH_WIDTH     # Width 
+        swmm_SUBCATCH_SLOPE     # Slope
+        swmm_SUBCATCH_CURB_LENGTH # Curb length
+        swmm_SUBCATCH_API_RAINFALL # API rainfall
+        swmm_SUBCATCH_API_SNOWFALL # API snowfall
         swmm_SUBCATCH_POLLUTANT_BUILDUP # Pollutant buildup
-        swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION # Pollutant ponded concentration
-        swmm_SUBCATCH_POLLUTANT_RUNOFF_CONCENTRATION # Pollutant runoff concentration
+        swmm_SUBCATCH_EXTERNAL_POLLUTANT_BUILDUP # External pollutant buildup
+        swmm_SUBCATCH_POLLUTANT_RUNOFF_CONCENTRATION # Pollutant ponded concentration
+        swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION # Pollutant runoff concentration
         swmm_SUBCATCH_POLLUTANT_TOTAL_LOAD # Pollutant total load
 
     # SWMM Node properties
@@ -80,8 +86,11 @@ cdef extern from "swmm5.h":
         swmm_NODE_INFLOW   # Total inflow
         swmm_NODE_OVERFLOW # Flooding
         swmm_NODE_RPTFLAG  # Reporting flag
+        swmm_NODE_SURCHARGE_DEPTH # Surcharge depth
+        swmm_NODE_PONDED_AREA   # Ponded area
+        swmm_NODE_INITIAL_DEPTH # Initial depth
         swmm_NODE_POLLUTANT_CONCENTRATION # Pollutant concentration
-        swmm_NODE_POLLUTANT_INFLOW_CONCENTRATION # Pollutant inflow concentration
+        swmm_NODE_POLLUTANT_LATMASS_FLUX  # Pollutant lateral mass flux
 
     # SWMM Link properties
     ctypedef enum swmm_LinkProperty:
@@ -100,8 +109,18 @@ cdef extern from "swmm5.h":
         swmm_LINK_VELOCITY   # Velocity
         swmm_LINK_TOPWIDTH   # Top width
         swmm_LINK_RPTFLAG    # Reporting flag
+        swmm_LINK_OFFSET1    # Inlet offset
+        swmm_LINK_OFFSET2    # Outlet offset
+        swmm_LINK_INITIAL_FLOW # Initial flow
+        swmm_LINK_FLOW_LIMIT # Flow limit
+        swmm_LINK_INLET_LOSS # Inlet loss
+        swmm_LINK_OUTLET_LOSS # Outlet loss
+        swmm_LINK_AVERAGE_LOSS # Average depth
+        swmm_LINK_SEEPAGE_RATE # Seepage rate
+        swmm_LINK_HAS_FLAPGATE # Flap gate
         swmm_LINK_POLLUTANT_CONCENTRATION  # Pollutant concentration
         swmm_LINK_POLLUTANT_LOAD # Pollutant load
+        swmm_LINK_POLLUTANT_LATMASS_FLUX # Pollutant lateral mass flux
 
     # SWMM System properties
     ctypedef enum swmm_SystemProperty:
@@ -125,7 +144,7 @@ cdef extern from "swmm5.h":
         swmm_IGNORERAINFALL      # Flag indicating whether rainfall is ignored.
         swmm_IGNORERDII          # Flag indicating whether RDII is ignored.
         swmm_IGNORESNOWMELT      # Flag indicating whether snowmelt is ignored.
-        swmm_IGNOREGWATER        # Flag indicating whether groundwater is ignored.
+        swmm_IGNOREGROUNDWATER   # Flag indicating whether groundwater is ignored.
         swmm_IGNOREROUTING       # Flag indicating whether routing is ignored.
         swmm_IGNOREQUALITY       # Flag indicating whether water quality is ignored.
         swmm_RULESTEP            # The rule step size.
@@ -168,6 +187,7 @@ cdef extern from "swmm5.h":
         ERR_API_TIME_PERIOD       # Invalid time period
         ERR_API_HOTSTART_FILE_OPEN # Error opening hotstart file
         ERR_API_HOTSTART_FILE_FORMAT # Invalid hotstart file format
+        ERR_API_IS_RUNNING        # Simulation is already running
 
     # SWMM API function return simulation progress
     ctypedef void (*progress_callback)(double progress); 
@@ -279,12 +299,27 @@ cdef extern from "swmm5.h":
     # param: index: object index
     cdef double swmm_getValue(int property, int index)
 
+
+    # Retrieves the value of a property for an object of a given type and index
+    # param: objType: object type
+    # param: property: property type
+    # param: index: object index
+    # param: subIndex: sub-index
+    cdef double swmm_getValueExpanded(int objType, int property, int index, int subIndex)
+
     # Sets the value of a property for an object of a given type and index
     # param: property: property type
     # param: index: object index
     # param: value: property value
     cdef int swmm_setValue(int property, int index,  double value)
     
+    # Sets the value of a property for an object of a given type and index
+    # param: objType: object type
+    # param: property: property type
+    # param: index: object index
+    # param: value: property value
+    cdef int swmm_setValueExpanded(int objType, int property, int index, int subindex, double value)
+
     # Retrieves the value of a property for an object of a given type and index
     # param: property: property type
     # param: index: object index

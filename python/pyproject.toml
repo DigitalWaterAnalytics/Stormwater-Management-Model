@@ -43,15 +43,20 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: C",
+    "Programming Language :: Cython",
+    "Programming Language :: C++",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Hydrology",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: GIS",
     "Development Status :: 3 - Alpha",
 ]
 
+[tool.distutils.bdist_wheel]
+universal = true
 
 [project.urls]
 # TODO: Change these URLs to the correct ones

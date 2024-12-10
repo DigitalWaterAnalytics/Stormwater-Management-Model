@@ -59,6 +59,7 @@
 //   Build 5.3.0:
 //   - Fixed potential precision loss when calculating TotalDuration.
 //   - Memory allocation and reading options for saving multiple hotstart files
+//   - Added support for api provided pollutant fluxes
 //-----------------------------------------------------------------------------
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -1073,8 +1074,8 @@ void createObjects()
     // --- allocate memory for water quality state variables
     for (j = 0; j < Nobjects[SUBCATCH]; j++)
     {
-        Subcatch[j].initBuildup =
-                              (double *) calloc(Nobjects[POLLUT], sizeof(double));
+        Subcatch[j].initBuildup = (double *) calloc(Nobjects[POLLUT], sizeof(double));
+        Subcatch[j].apiExtBuildup = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Subcatch[j].oldQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Subcatch[j].newQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Subcatch[j].pondedQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
@@ -1084,6 +1085,7 @@ void createObjects()
     {
         Node[j].oldQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Node[j].newQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
+        Node[j].apiExtQualMassFlux = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Node[j].extInflow = NULL;
         Node[j].dwfInflow = NULL;
         Node[j].rdiiInflow = NULL;
@@ -1095,6 +1097,7 @@ void createObjects()
         Link[j].oldQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Link[j].newQual = (double *) calloc(Nobjects[POLLUT], sizeof(double));
         Link[j].totalLoad = (double *) calloc(Nobjects[POLLUT], sizeof(double));
+        Link[j].apiExtQualMassFlux = (double *) calloc(Nobjects[POLLUT], sizeof(double));
     }
 
     // --- allocate memory for land use buildup/washoff functions
@@ -1150,6 +1153,7 @@ void createObjects()
         for (k = 0; k < Nobjects[POLLUT]; k++)
         {
             Subcatch[j].initBuildup[k] = 0.0;
+            Subcatch[j].apiExtBuildup[k] = 0.0;
         }
     }
 
@@ -1223,6 +1227,7 @@ void deleteObjects()
     if ( Subcatch ) for (j = 0; j < Nobjects[SUBCATCH]; j++)
     {
         FREE(Subcatch[j].initBuildup);
+        FREE(Subcatch[j].apiExtBuildup);
         FREE(Subcatch[j].oldQual);
         FREE(Subcatch[j].newQual);
         FREE(Subcatch[j].pondedQual);
@@ -1232,12 +1237,14 @@ void deleteObjects()
     {
         FREE(Node[j].oldQual);
         FREE(Node[j].newQual);
+        FREE(Node[j].apiExtQualMassFlux)
     }
     if ( Link ) for (j = 0; j < Nobjects[LINK]; j++)
     {
         FREE(Link[j].oldQual);
         FREE(Link[j].newQual);
         FREE(Link[j].totalLoad);
+        FREE(Link[j].apiExtQualMassFlux);
         // Any inlet assigned to Link[j].inlet is freed in inlet_delete().
     }
 
