@@ -975,7 +975,7 @@ int DLLEXPORT swmm_getCount(int objType)
 {
     if (!IsOpenFlag)
         return ERR_API_NOT_OPEN;
-    if (objType < swmm_GAGE || objType > swmm_SYSTEM)
+    if (objType < swmm_GAGE || objType >= swmm_SYSTEM)
         return ERR_API_OBJECT_TYPE;
     return Nobjects[objType];
 }
@@ -1060,7 +1060,7 @@ int DLLEXPORT swmm_getIndex(int objType, const char *name)
 {
     if (!IsOpenFlag)
         return ERR_API_NOT_OPEN;
-    if (objType < swmm_GAGE || objType > swmm_LINK)
+    if (objType < swmm_GAGE || objType >= swmm_SYSTEM)
         return ERR_API_OBJECT_TYPE;
     return project_findObject(objType, name);
 }
@@ -1653,7 +1653,7 @@ double getGageValue(int property, int index)
 
     total = gage_getPrecip(index, &rain, &snow);
 
-    switch (index)
+    switch (property)
     {
     case swmm_GAGE_TOTAL_PRECIPITATION:
         return total * UCF(RAINFALL);
@@ -1701,6 +1701,8 @@ double getSubcatchValue(int property, int index, int subIndex)
         return subcatch->newRunoff * UCF(FLOW);
     case swmm_SUBCATCH_RPTFLAG:
         return (subcatch->rptFlag > 0);
+    case swmm_SUBCATCH_WIDTH:
+        return subcatch->width * UCF(LENGTH);
 	case swmm_SUBCATCH_SLOPE:
 		return subcatch->slope;
 	case swmm_SUBCATCH_CURB_LENGTH:
@@ -1957,6 +1959,8 @@ double getSystemValue(int property)
         return IgnoreRouting;
     case swmm_IGNOREQUALITY:
         return IgnoreQuality;
+    case swmm_ERROR_CODE:
+        return ErrorCode;
     case swmm_RULESTEP:
         return RuleStep;
     case swmm_SWEEPSTART:

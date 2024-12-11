@@ -1,4 +1,4 @@
-// SWMM 5.2 Error Messages
+// SWMM 5.3 Error Messages
 
 ERR(101,"\n  ERROR 101: memory allocation error.")
 ERR(103,"\n  ERROR 103: cannot solve KW equations for Link %s.")
@@ -135,3 +135,5 @@ ERR(-999907,"\n  API Error -999907: invalid property type.")
 ERR(-999908,"\n  API Error -999908: invalid property value.")
 ERR(-999909,"\n  API Error -999909: invalid time period.")
 ERR(-999910,"\n  API Error -999910: cannot open hot start interface file %s.")
+ERR(-999911,"\n  API Error -999911: invalid hot start interface file format %s.")
+ERR(-999912,"\n  API Error -999912: simulation still running %s.")

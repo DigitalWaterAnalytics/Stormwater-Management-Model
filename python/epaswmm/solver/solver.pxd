@@ -147,6 +147,7 @@ cdef extern from "swmm5.h":
         swmm_IGNOREGROUNDWATER   # Flag indicating whether groundwater is ignored.
         swmm_IGNOREROUTING       # Flag indicating whether routing is ignored.
         swmm_IGNOREQUALITY       # Flag indicating whether water quality is ignored.
+        swmm_ERROR_CODE          # The error code.
         swmm_RULESTEP            # The rule step size.
         swmm_SWEEPSTART          # The start date of the sweep start.
         swmm_SWEEPEND            # The end date of the sweep end.

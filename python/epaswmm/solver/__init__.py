@@ -17,5 +17,6 @@ from .solver import (
     encode_swmm_datetime,
     version,
     SolverState,
+    SWMMSolverException,
     Solver
 )
