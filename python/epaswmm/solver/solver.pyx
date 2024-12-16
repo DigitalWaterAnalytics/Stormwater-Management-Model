@@ -21,7 +21,7 @@ cimport epaswmm.epaswmm as cepaswmm
 # cython: language_level=3
 
 from epaswmm.solver.solver cimport (
-    PyEval_CallObject,
+    PyObject_CallObject,
     clock_t,
     clock,
     swmm_Object,
@@ -527,7 +527,7 @@ cdef void c_wrapper_function(double x):
     """
     global py_progress_callback
     cdef tuple args = (x,)
-    PyEval_CallObject(py_progress_callback, args)
+    PyObject_CallObject(py_progress_callback, args)
 
 cdef progress_callback wrap_python_function_as_callback(object py_func):
     """
@@ -716,7 +716,7 @@ cdef class Solver:
     cdef object _solver_state
     cdef object _partial_step_function 
 
-    def __cinit__(self, str inp_file, str rpt_file, str out_file, int stride_step = 300, bint save_results=True):
+    def __cinit__(self, str inp_file, str rpt_file = None, str out_file = None, int stride_step = 300, bint save_results=True):
         """
         Constructor to create a new SWMM solver.
 
@@ -1030,7 +1030,7 @@ cdef class Solver:
         """
         cdef double value = swmm_getValueExpanded(object_type, property_type, index, sub_index)
         self.__validate_error(<int>value)
-        
+
         return value
     
     @property

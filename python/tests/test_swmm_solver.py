@@ -7,6 +7,9 @@ import unittest
 from datetime import datetime
 
 # third party imports
+import os
+import sys
+
 
 # local imports
 from .data import solver as example_solver_data

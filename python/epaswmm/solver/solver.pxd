@@ -4,7 +4,7 @@
 
 # cython: language_level=3
 cdef extern from "Python.h":
-    object PyEval_CallObject(object, object)
+    object PyObject_CallObject(object, object)
 
 cdef extern from "time.h":
     ctypedef long clock_t

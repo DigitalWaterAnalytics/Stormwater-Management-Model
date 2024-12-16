@@ -2,6 +2,9 @@
 # Created by: Caleb Buahin (EPA/ORD/CESER/WID)
 # Created on: 2024-11-19
 
+# Find Python extensions
+find_package(PythonExtensions REQUIRED)
+
 # Add Cython targets for epaswmm
 add_cython_target(epaswmm epaswmm.pyx CXX PY3)
 

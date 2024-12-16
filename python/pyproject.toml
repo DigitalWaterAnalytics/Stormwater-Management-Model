@@ -13,6 +13,9 @@ requires = [
 
 build-backend = "setuptools.build_meta"
 
+[tool.cibuildwheel]
+build = "cp37-* cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+
 [project]
 name = "epaswmm"
 description = "A python package for EPA SWMM5 preprocessing, solver, and post-processing."
@@ -42,6 +45,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: C",
     "Programming Language :: Cython",
     "Programming Language :: C++",
@@ -54,6 +58,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: GIS",
     "Development Status :: 3 - Alpha",
 ]
+
+# [tool.setuptools.bdist_wheel]
+# universal = true
 
 [tool.distutils.bdist_wheel]
 universal = true

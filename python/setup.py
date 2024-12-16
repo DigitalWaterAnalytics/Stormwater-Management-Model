@@ -32,7 +32,7 @@ def get_version():
     Get version from toolkit
     TODO: This should be revised to get version information from the toolkit
     """
-    return "5.3.0.dev0"
+    return "5.3.0.dev3"
 
 
 if os.environ.get('EPASWMM_CMAKE_ARGS') is not None:
