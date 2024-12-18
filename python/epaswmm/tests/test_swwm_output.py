@@ -22,6 +22,7 @@ class TestSWMMOutput(unittest.TestCase):
 
     TODO: Add tests to check for exceptions and errors
     """
+
     def setUp(self):
 
         self.test_artifacts = {}
@@ -107,15 +108,24 @@ class TestSWMMOutput(unittest.TestCase):
         :return:
         """
 
-        self.assertEqual(output.SubcatchAttribute.RAINFALL.value, 0, "RAINFALL subcatchment attribute value should be 0")
-        self.assertEqual(output.SubcatchAttribute.SNOW_DEPTH.value, 1, "SNOW_DEPTH subcatchment attribute value should be 1")
-        self.assertEqual(output.SubcatchAttribute.EVAPORATION_LOSS.value, 2, "EVAPORATION_LOSS subcatchment attribute value should be 2")
-        self.assertEqual(output.SubcatchAttribute.INFILTRATION_LOSS.value, 3, "INFILTRATION_LOSS subcatchment attribute value should be 3")
-        self.assertEqual(output.SubcatchAttribute.RUNOFF_RATE.value, 4, "RUNOFF_RATE subcatchment attribute value should be 4")
-        self.assertEqual(output.SubcatchAttribute.GROUNDWATER_OUTFLOW.value, 5, "GROUNDWATER_OUTFLOW subcatchment attribute value should be 5")
-        self.assertEqual(output.SubcatchAttribute.GROUNDWATER_TABLE_ELEVATION.value, 6, "GROUNTWATER_TABLE subcatchment attribute value should be 6")
-        self.assertEqual(output.SubcatchAttribute.SOIL_MOISTURE.value, 7, "SOIL_MOISTURE subcatchment attribute value should be 7")
-        self.assertEqual(output.SubcatchAttribute.POLLUTANT_CONCENTRATION.value, 8, "POLLUTANT_CONCENTRATION subcatchment attribute value should be 8")
+        self.assertEqual(output.SubcatchAttribute.RAINFALL.value, 0,
+                         "RAINFALL subcatchment attribute value should be 0")
+        self.assertEqual(output.SubcatchAttribute.SNOW_DEPTH.value, 1,
+                         "SNOW_DEPTH subcatchment attribute value should be 1")
+        self.assertEqual(output.SubcatchAttribute.EVAPORATION_LOSS.value, 2,
+                         "EVAPORATION_LOSS subcatchment attribute value should be 2")
+        self.assertEqual(output.SubcatchAttribute.INFILTRATION_LOSS.value, 3,
+                         "INFILTRATION_LOSS subcatchment attribute value should be 3")
+        self.assertEqual(output.SubcatchAttribute.RUNOFF_RATE.value, 4,
+                         "RUNOFF_RATE subcatchment attribute value should be 4")
+        self.assertEqual(output.SubcatchAttribute.GROUNDWATER_OUTFLOW.value, 5,
+                         "GROUNDWATER_OUTFLOW subcatchment attribute value should be 5")
+        self.assertEqual(output.SubcatchAttribute.GROUNDWATER_TABLE_ELEVATION.value, 6,
+                         "GROUNTWATER_TABLE subcatchment attribute value should be 6")
+        self.assertEqual(output.SubcatchAttribute.SOIL_MOISTURE.value, 7,
+                         "SOIL_MOISTURE subcatchment attribute value should be 7")
+        self.assertEqual(output.SubcatchAttribute.POLLUTANT_CONCENTRATION.value, 8,
+                         "POLLUTANT_CONCENTRATION subcatchment attribute value should be 8")
 
     def test_output_node_attribute_enum(self):
         """
@@ -124,12 +134,16 @@ class TestSWMMOutput(unittest.TestCase):
         """
 
         self.assertEqual(output.NodeAttribute.INVERT_DEPTH.value, 0, "INVERT_DEPTH node attribute value should be 0")
-        self.assertEqual(output.NodeAttribute.HYDRAULIC_HEAD.value, 1, "HYDRAULIC_HEAD node attribute value should be 1")
+        self.assertEqual(output.NodeAttribute.HYDRAULIC_HEAD.value, 1,
+                         "HYDRAULIC_HEAD node attribute value should be 1")
         self.assertEqual(output.NodeAttribute.STORED_VOLUME.value, 2, "STORED_VOLUME node attribute value should be 2")
-        self.assertEqual(output.NodeAttribute.LATERAL_INFLOW.value, 3, "LATERAL_INFLOW node attribute value should be 3")
+        self.assertEqual(output.NodeAttribute.LATERAL_INFLOW.value, 3,
+                         "LATERAL_INFLOW node attribute value should be 3")
         self.assertEqual(output.NodeAttribute.TOTAL_INFLOW.value, 4, "TOTAL_INFLOW node attribute value should be 4")
-        self.assertEqual(output.NodeAttribute.FLOODING_LOSSES.value, 5, "FLOODING_LOSSES node attribute value should be 5")
-        self.assertEqual(output.NodeAttribute.POLLUTANT_CONCENTRATION.value, 6, "POLLUTANT_CONCENTRATION node attribute value should be 6")
+        self.assertEqual(output.NodeAttribute.FLOODING_LOSSES.value, 5,
+                         "FLOODING_LOSSES node attribute value should be 5")
+        self.assertEqual(output.NodeAttribute.POLLUTANT_CONCENTRATION.value, 6,
+                         "POLLUTANT_CONCENTRATION node attribute value should be 6")
 
     def test_output_link_attribute_enum(self):
         """
@@ -142,7 +156,8 @@ class TestSWMMOutput(unittest.TestCase):
         self.assertEqual(output.LinkAttribute.FLOW_VELOCITY.value, 2, "FLOW_VELOCITY link attribute value should be 2")
         self.assertEqual(output.LinkAttribute.FLOW_VOLUME.value, 3, "FLOW_VOLUME link attribute value should be 3")
         self.assertEqual(output.LinkAttribute.CAPACITY.value, 4, "CAPACITY link attribute value should be 4")
-        self.assertEqual(output.LinkAttribute.POLLUTANT_CONCENTRATION.value, 5, "POLLUTANT_CONCENTRATION link attribute value should be 5")
+        self.assertEqual(output.LinkAttribute.POLLUTANT_CONCENTRATION.value, 5,
+                         "POLLUTANT_CONCENTRATION link attribute value should be 5")
 
     def test_output_system_attribute_enum(self):
         """
@@ -153,17 +168,26 @@ class TestSWMMOutput(unittest.TestCase):
         self.assertEqual(output.SystemAttribute.AIR_TEMP.value, 0, "AIR_TEMP system attribute value should be 0")
         self.assertEqual(output.SystemAttribute.RAINFALL.value, 1, "RAINFALL system attribute value should be 1")
         self.assertEqual(output.SystemAttribute.SNOW_DEPTH.value, 2, "SNOW_DEPTH system attribute value should be 2")
-        self.assertEqual(output.SystemAttribute.EVAP_INFIL_LOSS.value, 3, "EVAP_INFIL_LOSS system attribute value should be 3")
+        self.assertEqual(output.SystemAttribute.EVAP_INFIL_LOSS.value, 3,
+                         "EVAP_INFIL_LOSS system attribute value should be 3")
         self.assertEqual(output.SystemAttribute.RUNOFF_FLOW.value, 4, "RUNOFF_FLOW system attribute value should be 4")
-        self.assertEqual(output.SystemAttribute.DRY_WEATHER_INFLOW.value, 5, "DRY_WEATHER_INFLOW system attribute value should be 5")
-        self.assertEqual(output.SystemAttribute.GROUNDWATER_INFLOW.value, 6, "GROUNDWATER_INFLOW system attribute value should be 6")
+        self.assertEqual(output.SystemAttribute.DRY_WEATHER_INFLOW.value, 5,
+                         "DRY_WEATHER_INFLOW system attribute value should be 5")
+        self.assertEqual(output.SystemAttribute.GROUNDWATER_INFLOW.value, 6,
+                         "GROUNDWATER_INFLOW system attribute value should be 6")
         self.assertEqual(output.SystemAttribute.RDII_INFLOW.value, 7, "RDII_INFLOW system attribute value should be 7")
-        self.assertEqual(output.SystemAttribute.DIRECT_INFLOW.value, 8, "DIRECT_INFLOW system attribute value should be 8")
-        self.assertEqual(output.SystemAttribute.TOTAL_LATERAL_INFLOW.value, 9, "TOTAL_LATERAL_INFLOW system attribute value should be 9")
-        self.assertEqual(output.SystemAttribute.FLOOD_LOSSES.value, 10, "FLOOD_LOSSES system attribute value should be 10")
-        self.assertEqual(output.SystemAttribute.OUTFALL_FLOWS.value, 11, "OUTFALL_FLOWS system attribute value should be 11")
-        self.assertEqual(output.SystemAttribute.VOLUME_STORED.value, 12, "VOLUME_STORED system attribute value should be 12")
-        self.assertEqual(output.SystemAttribute.EVAPORATION_RATE.value, 13, "EVAPORATION_RATE system attribute value should be 13")
+        self.assertEqual(output.SystemAttribute.DIRECT_INFLOW.value, 8,
+                         "DIRECT_INFLOW system attribute value should be 8")
+        self.assertEqual(output.SystemAttribute.TOTAL_LATERAL_INFLOW.value, 9,
+                         "TOTAL_LATERAL_INFLOW system attribute value should be 9")
+        self.assertEqual(output.SystemAttribute.FLOOD_LOSSES.value, 10,
+                         "FLOOD_LOSSES system attribute value should be 10")
+        self.assertEqual(output.SystemAttribute.OUTFALL_FLOWS.value, 11,
+                         "OUTFALL_FLOWS system attribute value should be 11")
+        self.assertEqual(output.SystemAttribute.VOLUME_STORED.value, 12,
+                         "VOLUME_STORED system attribute value should be 12")
+        self.assertEqual(output.SystemAttribute.EVAPORATION_RATE.value, 13,
+                         "EVAPORATION_RATE system attribute value should be 13")
 
     def test_output_open_and_close(self):
         """
@@ -197,7 +221,7 @@ class TestSWMMOutput(unittest.TestCase):
         swmm_output = Output(example_output_data.EXAMPLE_OUTPUT_FILE_1)
         version = swmm_output.version
 
-        self.assertEqual(version,   51000, "Version should be 51000")
+        self.assertEqual(version, 51000, "Version should be 51000")
 
     def test_output_get_size(self):
         """

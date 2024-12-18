@@ -575,6 +575,16 @@ class Solver:
     """
     A class to represent a SWMM solver.
     """
+    def __init__(self, inp_file: str, rpt_file: str = ..., out_file: str = ...) -> None:
+        """
+        Constructor to initialize the solver.
+
+        :param inp_file: Input file name
+        :param rpt_file: Report file name
+        :param out_file: Output file name
+        """
+        ...
+        
     def __enter__(self): # -> Self@Solver:
         """
         Enter method for context manager.

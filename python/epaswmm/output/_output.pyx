@@ -13,10 +13,11 @@ from libc.stdlib cimport free, malloc
 # external imports
 
 # local python and cython imports
-cimport epaswmm.epaswmm as cepaswmm
-cimport epaswmm.output.output as coutput
+from ..solver import (
+    decode_swmm_datetime,
+)
 
-from epaswmm.output.output cimport (
+from .output cimport (
     SMO_unitSystem,
     SMO_flowUnits, 
     SMO_concUnits, 
@@ -26,6 +27,9 @@ from epaswmm.output.output cimport (
     SMO_nodeAttribute, 
     SMO_linkAttribute, 
     SMO_systemAttribute,
+    SMO_Handle,
+    MAXFILENAME,
+    MAXELENAME,
     SMO_init,
     SMO_open,
     SMO_close,
@@ -302,7 +306,7 @@ cdef class Output:
     :cvar _num_periods: Number of reporting periods.
     :cvar _times: Times of the simulation in the SWMM output file.
     """
-    cdef coutput.SMO_Handle _output_file_handle
+    cdef SMO_Handle _output_file_handle
     cdef int _version
     cdef int* _units
     cdef int _units_length
@@ -568,7 +572,7 @@ cdef class Output:
         error_code = SMO_getStartDate(self._output_file_handle, &swmm_datetime)
         self.__validate_error_code(error_code)
 
-        return cepaswmm.decode_swmm_datetime(swmm_datetime)
+        return decode_swmm_datetime(swmm_datetime)
 
     @property
     def times(self) -> List[datetime]:

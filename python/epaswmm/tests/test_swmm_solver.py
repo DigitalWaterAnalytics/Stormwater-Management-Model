@@ -385,3 +385,116 @@ class TestSWMMSolver(unittest.TestCase):
             )
 
             self.assertAlmostEqual(sc_value, 100.0)
+
+
+    def test_get_node_value(self):
+        """
+        Test the get_node_value function of the SWMM solver
+        :return:
+        """
+
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.NON_EXISTENT_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        ) as swmm_solver:
+            swmm_solver.initialize()
+
+            for t in range(12):
+                swmm_solver.step()
+
+            node_value = swmm_solver.get_value(
+                object_type=solver.SWMMObjects.NODE.value,
+                property_type=solver.SWMMNodeProperties.INFLOW.value,
+                index=5,
+            )
+
+            self.assertAlmostEqual(node_value, 0.0)
+
+    def test_set_node_value(self):
+        """
+        Test the set_node_value function of the SWMM solver
+        :return:
+        """
+
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.NON_EXISTENT_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        ) as swmm_solver:
+
+            swmm_solver.initialize()
+
+            error_code = swmm_solver.set_value(
+                object_type=solver.SWMMObjects.NODE.value,
+                property_type=solver.SWMMNodeProperties.INVERT_ELEVATION.value,
+                index=5,
+                value=10.0
+            )
+
+            for _ in range(12):
+                swmm_solver.step()
+
+            node_value = swmm_solver.get_value(
+                object_type=solver.SWMMObjects.NODE.value,
+                property_type=solver.SWMMNodeProperties.INVERT_ELEVATION.value,
+                index=5,
+            )
+
+            self.assertAlmostEqual(node_value, 10.0)
+
+    def test_get_link_value(self):
+        """
+        Test the get_link_value function of the SWMM solver
+        :return:
+        """
+
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.NON_EXISTENT_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        ) as swmm_solver:
+            swmm_solver.initialize()
+
+            for t in range(12):
+                swmm_solver.step()
+
+            link_value = swmm_solver.get_value(
+                object_type=solver.SWMMObjects.LINK.value,
+                property_type=solver.SWMMLinkProperties.FLOW.value,
+                index=9,
+            )
+
+            self.assertAlmostEqual(link_value, 0.0)
+
+    def test_set_link_value(self):
+        """
+        Test the set_link_value function of the SWMM solver
+        :return:
+        """
+
+        with solver.Solver(
+                inp_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE,
+                rpt_file=example_solver_data.NON_EXISTENT_INPUT_FILE.replace(".inp", ".rpt"),
+                out_file=example_solver_data.SITE_DRAINAGE_EXAMPLE_INPUT_FILE.replace(".inp", ".out"),
+        ) as swmm_solver:
+
+            swmm_solver.initialize()
+
+            error_code = swmm_solver.set_value(
+                object_type=solver.SWMMObjects.LINK.value,
+                property_type=solver.SWMMLinkProperties.OFFSET1.value,
+                index=9,
+                value=1.0
+            )
+
+            for _ in range(12):
+                swmm_solver.step()
+
+            link_value = swmm_solver.get_value(
+                object_type=solver.SWMMObjects.LINK.value,
+                property_type=solver.SWMMLinkProperties.OFFSET1.value,
+                index=9,
+            )
+
+            self.assertAlmostEqual(link_value, 1.0)

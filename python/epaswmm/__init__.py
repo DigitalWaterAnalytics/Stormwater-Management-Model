@@ -19,6 +19,4 @@ if platform.system() == "Windows":
     else:
         os.environ["PATH"] = lib_dir + ";" + os.environ["PATH"]
 
-from .epaswmm import *
-from . import solver
-from . import output
+from epaswmm import *

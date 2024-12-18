@@ -4,30 +4,24 @@
 # Created on: 2024-11-19
 #
 
-# Find Python
-find_package(Python3 REQUIRED COMPONENTS Development)
-
-# Find Python extensions
-find_package(PythonExtensions REQUIRED)
-
 # Add Cython target
-add_cython_target(solver solver.pyx CXX PY3)
+add_cython_target(_solver _solver.pyx CXX PY3)
 
 # Add library
-add_library(solver MODULE ${solver})
+add_library(_solver MODULE ${_solver})
 
 # Link to SWMM and Python libraries
-target_link_libraries(solver swmm5 Python3::Python)
+target_link_libraries(_solver swmm5 Python3::Python)
 
 # Specify that this is a Python extension module
-python_extension_module(solver)
+python_extension_module(_solver)
 
 # Install the target
-install(TARGETS solver LIBRARY DESTINATION epaswmm/solver)
+install(TARGETS _solver LIBRARY DESTINATION epaswmm/solver)
 
 # Include directories
 target_include_directories(
-    solver PUBLIC
+    _solver PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     $<TARGET_PROPERTY:swmm5,INCLUDE_DIRECTORIES>
     ${Python3_INCLUDE_DIRS}

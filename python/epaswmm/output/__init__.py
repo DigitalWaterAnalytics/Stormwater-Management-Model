@@ -1,4 +1,4 @@
-from .output import (
+from ._output import (
     UnitSystem,
     FlowUnits,
     ConcentrationUnits,

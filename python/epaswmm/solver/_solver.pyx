@@ -13,14 +13,7 @@ from libc.stdlib cimport free, malloc
 from functools import partialmethod
 
 # external imports
-
-# local python and cython imports
-# from epaswmm.array import Array1d
-cimport epaswmm.solver.solver as solver
-cimport epaswmm.epaswmm as cepaswmm
-# cython: language_level=3
-
-from epaswmm.solver.solver cimport (
+from .solver cimport (
     PyObject_CallObject,
     clock_t,
     clock,
@@ -805,7 +798,8 @@ cdef class Solver:
         :rtype: datetime
         """
         cdef double start_date = swmm_getValue(SWMMSystemProperties.START_DATE.value, 0)
-        return cepaswmm.decode_swmm_datetime(start_date)
+        
+        return decode_swmm_datetime(start_date)
 
     @start_datetime.setter
     def start_datetime(self, sim_start_datetime: datetime) -> None:
@@ -815,7 +809,7 @@ cdef class Solver:
         :param sim_start_datetime: Start date of the simulation
         :return: Error code (0 if successful)
         """
-        cdef double start_date = cepaswmm.encode_swmm_datetime(sim_start_datetime)
+        cdef double start_date = encode_swmm_datetime(sim_start_datetime)
         cdef int error_code = swmm_setValue(SWMMSystemProperties.START_DATE.value, 0, start_date)
 
         self.__validate_error(error_code)
@@ -829,7 +823,7 @@ cdef class Solver:
         :rtype: datetime
         """
         cdef double end_date = swmm_getValue(SWMMSystemProperties.END_DATE.value, 0)
-        return cepaswmm.decode_swmm_datetime(end_date)
+        return decode_swmm_datetime(end_date)
 
     @end_datetime.setter
     def end_datetime(self, sim_end_datetime: datetime) -> None:
@@ -839,7 +833,7 @@ cdef class Solver:
         :param sim_end_datetime: End date of the simulation
         :return: Error code (0 if successful)
         """
-        cdef double end_date = cepaswmm.encode_swmm_datetime(sim_end_datetime)
+        cdef double end_date = encode_swmm_datetime(sim_end_datetime)
         cdef int error_code = swmm_setValue(SWMMSystemProperties.END_DATE.value, 0, end_date)
 
         self.__validate_error(error_code)
@@ -897,7 +891,7 @@ cdef class Solver:
         :rtype: datetime
         """
         cdef double report_start_date = swmm_getValue(SWMMSystemProperties.REPORT_START_DATE.value, 0)
-        return cepaswmm.decode_swmm_datetime(report_start_date)
+        return decode_swmm_datetime(report_start_date)
 
     @report_start_datetime.setter
     def report_start_datetime(self, report_start_datetime: datetime) -> None:
@@ -907,7 +901,7 @@ cdef class Solver:
         :param report_start_datetime: Report start date
         :type report_start_datetime: datetime
         """
-        cdef double report_start_date = cepaswmm.encode_swmm_datetime(report_start_datetime)
+        cdef double report_start_date = encode_swmm_datetime(report_start_datetime)
         cdef int error_code = swmm_setValue(SWMMSystemProperties.REPORT_START_DATE.value, 0, report_start_date)
         self.__validate_error(error_code)
 
@@ -921,7 +915,7 @@ cdef class Solver:
         """
         cdef double current_date = swmm_getValue(SWMMSystemProperties.CURRENT_DATE.value, 0)
 
-        return cepaswmm.decode_swmm_datetime(current_date)
+        return decode_swmm_datetime(current_date)
     
     def get_object_count(self, object_type: SWMMObjects) -> int:
         """

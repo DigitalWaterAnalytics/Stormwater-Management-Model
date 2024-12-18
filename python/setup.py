@@ -24,7 +24,12 @@ platform_system = platform.system()
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Read the README file
-with open(os.path.join(here, '../README.md'), encoding='utf-8') as f:
+shutil.copyfile(
+    os.path.join(here, '..\README.md'), 
+    os.path.join(here, 'README.md')
+)
+
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 def get_version():

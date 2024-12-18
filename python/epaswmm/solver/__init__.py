@@ -2,7 +2,7 @@
 # Created by: Caleb Buahin (EPA/ORD/CESER/WID)
 # Created on: 2024-11-19
 
-from .solver import (
+from ._solver import (
     SWMMObjects,
     SWMMNodeTypes,
     SWMMRainGageProperties,

@@ -13,6 +13,7 @@ project(
 # Define build options
 find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 # Append local dir to module search path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
