@@ -15,19 +15,20 @@ jobs:
   build_and_unit_test_engine:
     name: Build and unit test engine 
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-13,  macos-latest]
         include:
           - os: windows-latest
-            continue-on-error: false
+            experimental: false
           - os: ubuntu-latest
-            continue-on-error: true
+            experimental: true
           - os: macos-13
-            continue-on-error: true
+            cexperimental: true
           - os: macos-latest
 
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.continue-on-error }}
+    continue-on-error: ${{ matrix.experimental }}
 
     steps:
     - name: Checkout repo
