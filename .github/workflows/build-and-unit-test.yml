@@ -17,8 +17,18 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-13,  macos-latest]
+        include:
+          - os: windows-latest
+            continue-on-error: false
+          - os: ubuntu-latest
+            continue-on-error: true
+          - os: macos-13
+            continue-on-error: true
+          - os: macos-latest
+
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
+    continue-on-error: ${{ matrix.continue-on-error }}
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -26,8 +36,8 @@ jobs:
     - name: Install boost-test (Windows)
       if: matrix.os == 'windows-latest' 
       run: |
-        .\${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe install boost-test
-        .\${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe integrate install
+        ${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe install boost-test
+        ${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe integrate install
 
     - name: Install boost-test (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -47,7 +57,7 @@ jobs:
       env:
         TOOL_CHAIN_PATH: ${{ env.VCPKG_INSTALLATION_ROOT }}\scripts\buildsystems\vcpkg.cmake
       run: |
-        cmake -B .\build -DBUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=${{env.TOOL_CHAIN_PATH}} .
+        cmake -G "Visual Studio 17 2022" -A x64 -B .\build -DBUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=${{env.TOOL_CHAIN_PATH}} .
         cmake --build .\build --config DEBUG
     
     - name: Build (Linux and Mac)
