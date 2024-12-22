@@ -12,7 +12,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(test_solver_errors, *boost::unit_test::label("Test SWMM Solver Errors"))
-BOOST_AUTO_TEST_CASE(test_solver_error) {
+BOOST_AUTO_TEST_CASE(test_solver_errors) {
 
 	BOOST_REQUIRE(true);
 }

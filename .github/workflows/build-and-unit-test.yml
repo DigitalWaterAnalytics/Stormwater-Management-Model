@@ -49,7 +49,7 @@ jobs:
     - name: Install OpenMP (MacOS)
       if: matrix.os == 'macos-13' || matrix.os == 'macos-latest'
       run: |
-        brew reinstall --build-from-source --formula ./exter/macos/libomp.rb
+        brew reinstall --build-from-source --formula ./extern/macos/libomp.rb
 
     - name: Build (Windows)
       if: matrix.os == 'windows-latest'
