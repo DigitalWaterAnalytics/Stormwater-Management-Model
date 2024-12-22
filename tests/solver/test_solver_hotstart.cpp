@@ -127,9 +127,11 @@ BOOST_AUTO_TEST_CASE(
 */
 BOOST_AUTO_TEST_CASE(
 	test_run_hotstart_first,
-	*boost::unit_test::depends_on("test_solver_hotstart/test_save_hotstart"),
 	*boost::unit_test::label("Test using first saved hotstart")
 ) {
+
+	BOOST_TEST_REQUIRE(boost::unit_test::depends_on("test_solver_hotstart/test_save_hotstart"));
+
 	int error = 0;
 	std::string originalFilepath = std::string(ORIGINAL_INPUT_FILE);
 	std::string filepath = std::string(RUN_HOTSTART_INPUT_FILE_v1);

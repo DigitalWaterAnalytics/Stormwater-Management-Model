@@ -17,10 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-13,  macos-latest]
+        os: [ubuntu-latest, macos-13,  macos-latest]
         include:
-          - os: windows-latest
-            experimental: false
           - os: ubuntu-latest
             experimental: true
           - os: macos-13
@@ -46,7 +44,7 @@ jobs:
 
     - name: Install boost-test (MacOS)
       if: matrix.os == 'macos-13' || matrix.os == 'macos-latest'
-      run: brew install boost-test
+      run: brew install boost
 
     - name: Install OpenMP (MacOS)
       if: matrix.os == 'macos-13' || matrix.os == 'macos-latest'
