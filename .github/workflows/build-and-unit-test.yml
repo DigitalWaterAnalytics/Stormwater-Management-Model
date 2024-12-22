@@ -37,7 +37,7 @@ jobs:
     - name: Install boost-test (Windows)
       if: matrix.os == 'windows-latest' 
       run: |
-        ${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe install boost-test
+        C:\vcpkg\vcpkg.exe install boost-test
         ${{ env.VCPKG_INSTALLATION_ROOT }}\vcpkg.exe integrate install
 
     - name: Install boost-test (Linux)

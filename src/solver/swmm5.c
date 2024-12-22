@@ -2255,7 +2255,7 @@ int setSystemValue(int property, double value)
 //  Output:  returns an error code
 //  Purpose: sets the value of a system property.
 {
-    int y, m, d, h, min, s;
+    int y, m, d, h, mm, s;
 
     if (IsStartedFlag)
         return ERR_API_NOT_ENDED;
@@ -2265,9 +2265,9 @@ int setSystemValue(int property, double value)
     case swmm_STARTDATE:
         StartDateTime = value;
         datetime_decodeDate(value, &y, &m, &d);
-        datetime_decodeTime(value, &h, &min, &s);
+        datetime_decodeTime(value, &h, &mm, &s);
         StartDate = datetime_encodeDate(y, m, d);
-        StartTime = datetime_encodeTime(h, min, s);
+        StartTime = datetime_encodeTime(h, mm, s);
         TotalDuration = floor((EndDate - StartDate) * SECperDAY + (EndTime - StartTime) * SECperDAY);
         // convert total duration to milliseconds
         TotalDuration *= 1000.0;
@@ -2293,9 +2293,9 @@ int setSystemValue(int property, double value)
     case swmm_ENDDATE:
         EndDateTime = value;
         datetime_decodeDate(value, &y, &m, &d);
-        datetime_decodeTime(value, &h, &min, &s);
+        datetime_decodeTime(value, &h, &mm, &s);
         EndDate = datetime_encodeDate(y, m, d);
-        EndTime = datetime_encodeTime(h, min, s);
+        EndTime = datetime_encodeTime(h, mm, s);
         TotalDuration = floor((EndDate - StartDate) * SECperDAY + (EndTime - StartTime) * SECperDAY);
         // convert total duration to milliseconds
         TotalDuration *= 1000.0;
@@ -2303,9 +2303,9 @@ int setSystemValue(int property, double value)
     case swmm_REPORTSTART:
         ReportStart = value;
         datetime_decodeDate(value, &y, &m, &d);
-        datetime_decodeTime(value, &h, &min, &s);
+        datetime_decodeTime(value, &h, &mm, &s);
         ReportStartDate = datetime_encodeDate(y, m, d);
-        ReportStartTime = datetime_encodeTime(h, min, s);
+        ReportStartTime = datetime_encodeTime(h, mm, s);
         return 0;
     case swmm_NUMTHREADS:
         // possible over allocation of threads but we trust the user to know what they are doing. Limit to max threads.
