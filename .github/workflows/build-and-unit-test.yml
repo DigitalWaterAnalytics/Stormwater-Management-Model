@@ -24,12 +24,12 @@ jobs:
           - os: ubuntu-latest
             experimental: true
           - os: macos-13
-            cexperimental: true
+            experimental: true
           - os: macos-latest
+            experimental: true
 
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
-
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
