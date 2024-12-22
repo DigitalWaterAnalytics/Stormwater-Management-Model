@@ -111,8 +111,8 @@ with Solver(inp_file="input_file.inp") as swmm_solver:
       print(swmm_solver.current_datetime)
 
       swmm_solver.set_value(
-         object_type=solver.SWMMObjects.RAIN_GAGE.value,
-         property_type=solver.SWMMRainGageProperties.GAGE_RAINFALL.value,
+         object_type=solver.SWMMObjects.RAIN_GAGE,
+         property_type=solver.SWMMRainGageProperties.GAGE_RAINFALL,
          index=0,
          value=3.6
       )
@@ -122,7 +122,7 @@ swmm_output = Output(output_file='output_file.out')
 # Dict[datetime, float]
 link_timeseries = swmm_output.get_link_timeseries(
    element_index=5,
-   attribute=output.LinkAttribute.FLOW_RATE.value,
+   attribute=output.LinkAttribute.FLOW_RATE,
 )
 
 ```

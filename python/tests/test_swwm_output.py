@@ -13,7 +13,7 @@ import pickle
 # local imports
 from .data import output as example_output_data
 from epaswmm import output
-from epaswmm.output import Output, SWMMOutputException
+from output import Output, SWMMOutputException
 
 
 class TestSWMMOutput(unittest.TestCase):
@@ -24,29 +24,15 @@ class TestSWMMOutput(unittest.TestCase):
     """
 
     def setUp(self):
+        """
+        Set up the test case with the test artifacts
+        :return:
+        """
 
         self.test_artifacts = {}
 
         with open(example_output_data.JSON_TIME_SERIES_FILE, 'rb') as f:
             self.test_artifacts = pickle.load(f)
-
-    # def test_output_encode_date(self):
-    #     """
-    #     Test the encode_swmm_datetime function
-    #     :return:
-    #     """
-    #
-    #     swmm_datetime = datetime(year=2024, month=11, day=16, hour=13, minute=33, second=21)
-    #     swmm_datetime_encoded = output.encode_swmm_datetime(swmm_datetime)
-    #     self.assertAlmostEqual(swmm_datetime_encoded, 45612.564826389)
-    #
-    # def test_output_decode_date(self):
-    #     """
-    #     Test the decode_swmm_datetime function
-    #     :return:
-    #     """
-    #     swmm_datetime = output.decode_swmm_datetime(45612.564826389)
-    #     self.assertEqual(swmm_datetime, datetime(year=2024, month=11, day=16, hour=13, minute=33, second=21))
 
     def test_output_unit_system_enum(self):
         """
@@ -612,9 +598,10 @@ class TestSWMMOutput(unittest.TestCase):
     def assert_dict_almost_equal(d1: dict, d2: dict, rtol: float = 1e-5, atol: float = 1e-8):
         """
         Assert that two dictionaries are almost equal
-        :param rtol:
         :param d1: First dictionary
         :param d2: Second dictionary
+        :param rtol: Relative error
+        :param atol: Absolute error
         :return:
         """
         """Assert that two dictionaries are almost equal (with tolerance)."""

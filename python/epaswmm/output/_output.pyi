@@ -264,6 +264,16 @@ class Output:
     :cvar _num_periods: Number of reporting periods.
     :cvar _times: Times of the simulation in the SWMM output file.
     """
+
+    def __init__(self, output_file: str) -> None:
+        """
+        Constructor to initialize the SWMM output file instance.
+
+        :param output_file: Path to the SWMM output file.
+        :type output_file: str
+        """
+        ...
+
     def __enter__(self): # -> Self@Output:
         """
         Method to return the SWMM output file instance.

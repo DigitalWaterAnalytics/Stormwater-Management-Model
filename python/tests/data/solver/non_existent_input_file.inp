@@ -492,8 +492,3 @@ RainGage         -175.841           1212.778
 853.182            96.281             "S6" "" "Arial" 14 0 0
 1094.291           753.590            "S7" "" "Arial" 14 0 0
 1375.584           437.852            "Outfall" "" "Arial" 10 1 0
-
-
-[BACKDROP]
-FILE       "C:\Users\CBUAHIN\OneDrive - Environmental Protection Agency (EPA)\Profile\Documents\EPA SWMM Projects\Samples\Site-Post.jpg"
-DIMENSIONS 0.000 0.000 1423.000 1475.000

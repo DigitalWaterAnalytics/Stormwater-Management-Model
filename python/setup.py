@@ -7,12 +7,12 @@ import os
 import sys
 import platform
 import subprocess
-from setuptools import Command
+from setuptools import Command, find_packages
 from setuptools.command.build_ext import build_ext
 import shutil
 
 # third party imports
-from skbuild import setup
+from skbuild import setup 
 
 # local imports
 
@@ -59,9 +59,9 @@ setup(
     version=get_version(),
     long_description=long_description,
     long_description_content_type='text/markdown',
-    packages=[
-        "epaswmm",
-    ],
+    packages=find_packages(
+        exclude=["__pycache__"]
+    ),
     cmake_args=[
         *cmake_args,
     ],

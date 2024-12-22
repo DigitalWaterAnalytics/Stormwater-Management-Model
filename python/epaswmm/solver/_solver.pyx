@@ -7,7 +7,7 @@
 # python and cython imports
 from enum import Enum
 from warnings import warn
-from typing import List, Tuple, Union, Optional, Dict, Set, Callable
+from typing import List, Tuple, Union, Dict, Set, Callable
 from cpython.datetime cimport datetime, timedelta
 from libc.stdlib cimport free, malloc
 from functools import partialmethod
@@ -995,34 +995,65 @@ cdef class Solver:
 
         return index
 
-    cpdef void set_value(self, int object_type, int property_type, int index, double value, int sub_index = -1):
+    def set_value(
+        self, 
+        object_type: SWMMObjects, 
+        property_type: Union[
+            SWMMRainGageProperties, 
+            SWMMSubcatchmentProperties, 
+            SWMMNodeProperties, 
+            SWMMLinkProperties, 
+            SWMMSystemProperties
+        ], 
+        index: int, 
+        value: double, 
+        sub_index: int = -1
+        ) -> None:
         """
         Set a SWMM system property value.
         
-        :param object_type: SWMM object type (e.g., SWMMObjects.NODE.value)
-        :type object_type: int
-        :param property_type: System property type (e.g., SWMMSystemProperties.ELEVATION.value)
-        :type property_type: int
+        :param object_type: SWMM object type (e.g., SWMMObjects.NODE)
+        :type object_type: SWMMObjects 
+        :param property_type: SWMM system property type (e.g., SWMMSystemProperties.START_DATE)
+        :type property_type: Union[SWMMRainGageProperties, SWMMSubcatchmentProperties, SWMMNodeProperties, SWMMLinkProperties, SWMMSystemProperties]
+        :param index: Object index (e.g., 0)
+        :type index: int
+        :param value: Property value (e.g., 10.0)
+        :type value: double
+        :param sub_index: Sub-index (e.g., 0) for properties with sub-indexes. For example pollutant index for POLLUTANT properties.
+        :type sub_index: int
+        """
+        cdef int error_code = swmm_setValueExpanded(<int>object_type.value, <int>property_type.value, index, sub_index, value)
+        self.__validate_error(error_code)
+
+    def get_value(
+        self, 
+        object_type: SWMMObjects, 
+        property_type: Union[
+            SWMMRainGageProperties, 
+            SWMMSubcatchmentProperties, 
+            SWMMNodeProperties, 
+            SWMMLinkProperties, 
+            SWMMSystemProperties
+        ],
+        index: int, 
+        sub_index: int = -1
+        ) -> double:
+        """
+        Get a SWMM system property value.
+        
+        :param object_type: SWMM object type (e.g., SWMMObjects.NODE)
+        :type object_type: SWMMObjects
+        :param property_type: SWMM system property type (e.g., SWMMSystemProperties.START_DATE)
+        :type property_type: Union[SWMMRainGageProperties, SWMMSubcatchmentProperties, SWMMNodeProperties, SWMMLinkProperties, SWMMSystemProperties]
         :param index: Object index (e.g., 0)
         :type index: int
         :param sub_index: Sub-index (e.g., 0) for properties with sub-indexes. For example pollutant index for POLLUTANT properties.
         :type sub_index: int
-        :param value: Property value (e.g., 10.0)
-        :type value: double
-        """
-        cdef int error_code = swmm_setValueExpanded(object_type, property_type, index, sub_index, value)
-        self.__validate_error(error_code)
-
-    cpdef double get_value(self, int object_type, int property_type, int index, int sub_index = -1):
-        """
-        Get a SWMM system property value.
-        
-        :param property_type: System property type
-        :type property_type: SWMMSystemProperties
         :return: Property value
         :rtype: double
         """
-        cdef double value = swmm_getValueExpanded(object_type, property_type, index, sub_index)
+        cdef double value = swmm_getValueExpanded(<int>object_type.value, <int>property_type.value, index, sub_index)
         self.__validate_error(<int>value)
 
         return value
