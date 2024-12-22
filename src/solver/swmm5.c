@@ -1735,7 +1735,7 @@ double getSubcatchValue(int property, int index, int subIndex)
     case swmm_SUBCATCH_POLLUTANT_PONDED_CONCENTRATION:
         if (subIndex < 0 || subIndex >= Nobjects[POLLUT])
             return ERR_API_OBJECT_INDEX;
-        return subcatch->pondedQual[subIndex] / (subcatch_getDepth(index) * max(0.0, subcatch->area - subcatch->lidArea)  * UCF(LANDAREA));
+        return subcatch->pondedQual[subIndex] / (subcatch_getDepth(index) * MAX(0.0, subcatch->area - subcatch->lidArea)  * UCF(LANDAREA));
 
     case swmm_SUBCATCH_POLLUTANT_TOTAL_LOAD:
         if (subIndex < 0 || subIndex >= Nobjects[POLLUT])
@@ -2309,7 +2309,7 @@ int setSystemValue(int property, double value)
         return 0;
     case swmm_NUMTHREADS:
         // possible over allocation of threads but we trust the user to know what they are doing. Limit to max threads.
-        NumThreads = max(1, min((int)value, omp_get_max_threads()));
+        NumThreads = MAX(1, MIN((int)value, omp_get_max_threads()));
         return 0;
     case swmm_SURCHARGEMETHOD:
         if (value >= EXTRAN && value <= SLOT)
