@@ -45,6 +45,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include "headers.h"
 #include "lid.h"
 #include "odesolve.h"
